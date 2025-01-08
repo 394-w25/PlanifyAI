@@ -1,0 +1,84 @@
+name: Firebase Auto Deploy
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - firebase.json
+      - package.json
+      - index.html
+      - vitest.config.js
+      - .firebaserc
+      - '.github/workflows/*'
+
+concurrency:
+  group: firebase-deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    name: 🛠️ Build, Test, and Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the code
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      # Step 2: Setup Node.js and enable caching
+      - name: 🛠️ Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: npm
+
+      # Step 3: Restore dependencies cache
+      - name: 📂 Restore npm cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-cache-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-cache-
+
+      # Step 4: Install dependencies
+      - name: 📂 Install Packages
+        run: npm ci
+
+      # Step 5: Run linter
+      - name: 🚨 Lint Code
+        run: npm run lint:fix
+
+      # Step 6: Build the project
+      - name: 🧱 Build Project
+        run: npm run build
+
+      # Step 7: Cache the build output
+      - name: 📦 Cache build output
+        uses: actions/cache@v4
+        with:
+          path: |
+            dist
+          key: ${{ runner.os }}-build-cache-${{ hashFiles('src/**', 'public/**') }}
+          restore-keys: |
+            ${{ runner.os }}-build-cache-
+
+      # Step 8: Run tests
+      - name: 🧪 Run Tests with Vitest
+        if: success()
+        run: npm run test:ci
+
+      # Step 9: Install Firebase CLI (use cache for global installs)
+      - name: 🌍 Install Firebase Tools
+        if: success()
+        run: npm install -g firebase-tools
+
+      # Step 10: Deploy to Firebase
+      - name: 🚀 Deploy to Firebase
+        if: success()
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: firebase deploy --non-interactive

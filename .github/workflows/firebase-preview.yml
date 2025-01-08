@@ -1,0 +1,119 @@
+name: Firebase Preview Deploy
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  deploy-preview:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: npm
+
+      - name: 📂 Restore npm cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-cache-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-cache-
+
+      - name: 📂 Install dependencies
+        run: npm ci
+
+      - name: 📦 Restore build cache
+        uses: actions/cache@v4
+        with:
+          path: dist
+          key: ${{ runner.os }}-build-cache-${{ hashFiles('src/**', 'public/**') }}
+          restore-keys: |
+            ${{ runner.os }}-build-cache-
+
+      - name: 🔨 Build the app
+        run: npm run build
+
+      # 🚨 Run Lint check
+      - name: 🚨 Run Lint
+        run: npm run lint:fix | tee lint-results.txt
+
+      - name: 🧪 Test the app with Vitest
+        run: npm run test:ci | tee test-results.txt
+      # 🚮 Clean up all results for comment
+      - name: 🚮 Clean up results
+        run: |
+          sed -i 's/\x1b\[[0-9;]*m//g' prettier-results.txt
+          sed -i 's/\x1b\[[0-9;]*m//g' lint-results.txt
+          sed -i 's/\x1b\[[0-9;]*m//g' test-results.txt
+
+      # 📄 Format all results for better readability
+      - name: 📄 Format all results
+        run: |
+          {
+            echo "### 🧪 Test Results"
+            echo ""
+            if grep -q "failed" test-results.txt; then
+              echo "❌ **Some tests failed**:"
+              echo '```'
+              grep -E "Test Files|Tests|Duration|failed" test-results.txt
+              echo '```'
+              echo "💥 Please review the failed tests above."
+            else
+              echo "✅ **Tests Passed**: All tests passed successfully!"
+            fi
+            echo ""
+            echo "---"
+            echo  ""
+            echo "### 🎨 Lint Check"
+            echo ""
+            if grep -qE "^[^0]* problems" lint-results.txt; then
+              echo "⚠️ **Lint Issues Found** - PLEASE FIX THEM!"
+              echo '```'
+              cat lint-results.txt
+              echo '```'
+            else
+              echo "✅ **Lint**: No linting issues found!"
+            fi
+          } > formatted-results.txt
+
+      - name: 🚀 Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: 🌐 Deploy to Firebase Preview Channel
+        id: firebase_deploy
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: |
+          firebase hosting:channel:deploy pr-${{ github.event.number }} --expires 2d | tee deploy-output.txt
+
+      - name: 🔗 Extract Preview URL
+        id: extract_url
+        run: |
+          URL=$(grep -oP 'https:\/\/[^\s]+pr-${{ github.event.number }}[^\s]+' deploy-output.txt)
+          echo "PREVIEW_URL=${URL}" >> $GITHUB_ENV
+
+      - name: 💬 Post test results and preview link to PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const previewUrl = process.env.PREVIEW_URL;
+            const fs = require('fs');
+            const testResults = fs.readFileSync('formatted-results.txt', 'utf8');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🚀 Preview for this PR is available at: ${previewUrl} \n\n ${testResults}`
+            });

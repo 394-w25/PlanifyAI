@@ -1,0 +1,29 @@
+name: Assign random reviewers to PR
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  assign_reviewers:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Randomly assign reviewers, excluding PR author
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const reviewers = ['ZL-Asica'];
+            const prAuthor = context.payload.pull_request.user.login; // Get PR author
+
+            // Filter out the PR author from the list of reviewers
+            const availableReviewers = reviewers.filter(reviewer => reviewer !== prAuthor);
+
+            // Assign all other team members to review to the PR
+            await github.rest.pulls.requestReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number, // Use the PR number
+              reviewers: availableReviewers
+            });

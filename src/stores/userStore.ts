@@ -5,6 +5,7 @@ import { onAuthStateChanged } from 'firebase/auth'
 import { create } from 'zustand'
 
 import { persist } from 'zustand/middleware'
+import useScheduleStore from './scheduleStore'
 
 interface UserState {
   user: UserProfile | undefined
@@ -51,11 +52,17 @@ const useUserStore = create<UserState>()(
               user: { ...profile },
               error: null,
             })
+
+            const { fetchSchedule } = useScheduleStore.getState()
+            await fetchSchedule(profile.uid)
           }
         }
         catch (error) {
           console.error('Error during login:', error)
           set({ error: 'Login failed. Please try again.' })
+
+          const { clearSchedule } = useScheduleStore.getState()
+          clearSchedule()
         }
         finally {
           set({ loading: false })
@@ -75,6 +82,9 @@ const useUserStore = create<UserState>()(
         }
         finally {
           set({ loading: false })
+
+          const { clearSchedule } = useScheduleStore.getState()
+          clearSchedule()
         }
       },
 

@@ -24,7 +24,7 @@ const AppRoutes = () => {
       >
         <Route
           index
-          element={<Home />}
+          element={<ProtectedRoute element={<Home />} />}
         />
         {routeConfig.map(({ path, element }) => (
           <Route

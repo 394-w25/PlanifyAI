@@ -40,20 +40,20 @@ const ServerDay = (
   )
 }
 
-interface TasksCalendarProps {
-  tasks: Task[]
+interface ScheduleCalendarProps {
+  schedule: Schedule
   setSelectedDate: (date: Dayjs) => void
 }
 
-const TasksCalendar = ({ tasks, setSelectedDate }: TasksCalendarProps) => {
+const ScheduleCalendar = ({ schedule, setSelectedDate }: ScheduleCalendarProps) => {
   // Extract unique days with tasks
   const highlightedDays = useMemo(() => {
-    return tasks
-      .map((tasks) => {
-        return dayjs(tasks.date).format('YYYY-MM-DD')
+    return schedule
+      .map((task) => {
+        return dayjs(task.date).format('YYYY-MM-DD')
       })
       .filter(Boolean)
-  }, [tasks])
+  }, [schedule])
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -61,10 +61,7 @@ const TasksCalendar = ({ tasks, setSelectedDate }: TasksCalendarProps) => {
         onChange={setSelectedDate}
         slots={{
           day: dayProps => (
-            <ServerDay
-              {...dayProps}
-              highlightedDays={highlightedDays}
-            />
+            <ServerDay {...dayProps} highlightedDays={highlightedDays} />
           ),
         }}
       />
@@ -72,4 +69,4 @@ const TasksCalendar = ({ tasks, setSelectedDate }: TasksCalendarProps) => {
   )
 }
 
-export default TasksCalendar
+export default ScheduleCalendar

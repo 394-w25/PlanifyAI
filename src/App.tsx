@@ -21,10 +21,7 @@ const App = () => {
   return (
     <Router>
       <ThemeProvider theme={theme}>
-        <Toaster
-          richColors
-          position="top-center"
-        />
+        <Toaster richColors position="top-center" />
         <AppRoutes />
       </ThemeProvider>
     </Router>

@@ -16,7 +16,7 @@ const getUserProfile = async (
     name: displayName ?? 'Unnamed User',
     createdAt: new Date().toISOString(),
     role: 'user' as UserType,
-  }
+  } as UserProfile
 
   const userProfile = await getOrCreateDocument<UserProfile>(uid, defaultProfile)
 

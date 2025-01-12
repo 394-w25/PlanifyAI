@@ -11,8 +11,8 @@ interface AddTaskButtonProps {
 const AddTaskButton = ({ selectedDate }: AddTaskButtonProps) => {
   const addTask = useScheduleStore(state => state.addTask)
 
+  const [date, setDate] = useState(selectedDate?.format('YYYY-MM-DD') ?? '')
   const [open, toggleOpen] = useToggle()
-  const date = selectedDate?.format('YYYY-MM-DD') ?? ''
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState<TaskCategory>('work')
@@ -40,6 +40,7 @@ const AddTaskButton = ({ selectedDate }: AddTaskButtonProps) => {
             label="Date"
             type="date"
             value={date}
+            onChange={event_ => setDate(event_.target.value)}
             slotProps={{
               inputLabel: { shrink: true },
             }}

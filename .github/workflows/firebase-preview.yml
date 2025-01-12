@@ -54,7 +54,6 @@ jobs:
       # 🚮 Clean up all results for comment
       - name: 🚮 Clean up results
         run: |
-          sed -i 's/\x1b\[[0-9;]*m//g' prettier-results.txt
           sed -i 's/\x1b\[[0-9;]*m//g' lint-results.txt
           sed -i 's/\x1b\[[0-9;]*m//g' test-results.txt
 

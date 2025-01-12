@@ -3,11 +3,12 @@ import Home from '@/pages/Home'
 import { Box } from '@mui/material'
 
 import { Route, Routes } from 'react-router-dom'
+import Me from './pages/Me'
 import { useUserStore } from './stores'
 
 const AppRoutes = () => {
   const routeConfig = [
-    { path: '/user', element: <Home /> },
+    { path: '/user', element: <Me /> },
   ]
 
   const loading = useUserStore(state => state.loading)

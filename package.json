@@ -26,6 +26,7 @@
     "dayjs": "^1.11.13",
     "es-toolkit": "^1.29.0",
     "firebase": "^11.0.2",
+    "lucide-react": "^0.471.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.0.2",

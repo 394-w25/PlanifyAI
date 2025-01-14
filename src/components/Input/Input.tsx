@@ -16,7 +16,7 @@ const ChatInterface: React.FC = () => {
     e.preventDefault()
     if (inputValue.trim()) {
       const newMessage: Message = {
-        id: crypto.randomUUID(), // Generate unique ID for key prop
+        id: crypto.randomUUID(),
         role: 'user',
         content: inputValue.trim(),
       }

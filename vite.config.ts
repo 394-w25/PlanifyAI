@@ -17,6 +17,7 @@ export default defineConfig({
           react: ['react', 'react-dom'],
           mui: ['@mui/material', '@emotion/react', '@emotion/styled'],
           datePicker: ['@mui/x-date-pickers'],
+          fullcalendar: ['@fullcalendar/core', '@fullcalendar/interaction', '@fullcalendar/timegrid', '@fullcalendar/react'],
           icons: ['@mui/icons-material'],
           firebaseApp: ['firebase/app'],
           firebaseAuth: ['firebase/auth'],

@@ -13,12 +13,18 @@ type TaskCategory = 'work' | 'personal' | 'health' | 'learning' | 'other' | 'sch
 
 type TaskPriority = 'low' | 'medium' | 'high'
 
+interface TaskTimeRange {
+  start: string
+  end: string
+}
+
 interface Task {
   taskId: string
   title: string
   description: string
   category: TaskCategory
   date: string
+  timeRange?: TaskTimeRange
   priority: TaskPriority
   status: 'pending' | 'completed'
 }

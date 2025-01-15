@@ -1,7 +1,15 @@
 import { Box } from '@mui/material'
-import { memo } from 'react'
+import { memo, useEffect, useRef } from 'react'
 
 const MessageList = memo(({ messages }: { messages: Message[] }) => {
+  const lastMessageRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    if (lastMessageRef.current) {
+      lastMessageRef.current.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [messages])
+
   return (
     <Box
       sx={{
@@ -13,9 +21,10 @@ const MessageList = memo(({ messages }: { messages: Message[] }) => {
         gap: 2,
       }}
     >
-      {messages.map(({ id, text, sender, timestamp }) => (
+      {messages.map(({ id, text, sender, timestamp }, index) => (
         <Box
           key={id}
+          ref={index === messages.length - 1 ? lastMessageRef : null}
           sx={{
             alignSelf: sender === 'user' ? 'flex-end' : 'flex-start',
             maxWidth: '70%',

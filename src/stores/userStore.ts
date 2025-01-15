@@ -32,9 +32,13 @@ const useUserStore = create<UserState>()(
             if (firebaseUser) {
               const currentUser = get().user
               set({ user: currentUser || undefined })
+              const { fetchSchedule } = useScheduleStore.getState()
+              await fetchSchedule(firebaseUser.uid)
             }
             else {
               set({ user: undefined })
+              const { clearSchedule } = useScheduleStore.getState()
+              clearSchedule()
             }
             set({ loading: false })
           },

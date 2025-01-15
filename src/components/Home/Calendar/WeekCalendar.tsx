@@ -16,12 +16,16 @@ interface ScheduleCalendarProps {
   setSelectedDate: (date: Dayjs) => void
 }
 
+interface DateClickArg {
+  dateStr: string
+}
+
 const CalendarComponent = ({ schedule, setSelectedDate }: ScheduleCalendarProps) => {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
-  const [open, toggleOpen] = useToggle(false)
+  const [open, toggleOpen] = useToggle()
 
-  const handleTaskClick = (task: Task | null) => {
-    setSelectedTask(task)
+  const handleTaskClick = (task: Task | undefined) => {
+    setSelectedTask(task ?? null)
     toggleOpen()
   }
 
@@ -43,8 +47,7 @@ const CalendarComponent = ({ schedule, setSelectedDate }: ScheduleCalendarProps)
       .filter(Boolean)
   }, [schedule])
 
-  const handleDateClick = (arg: any) => {
-    // eslint-disable-next-line ts/no-unsafe-argument, ts/no-unsafe-member-access
+  const handleDateClick = (arg: DateClickArg) => {
     setSelectedDate(dayjs(arg.dateStr))
   }
 
@@ -70,8 +73,7 @@ const CalendarComponent = ({ schedule, setSelectedDate }: ScheduleCalendarProps)
         dayHeaderClassNames="dayHeaderClassNames"
         eventClassNames="eventClassNames"
         eventClick={({ event }) => {
-          const current: any = schedule?.find(v => v.taskId === event.id)
-          // eslint-disable-next-line ts/no-unsafe-argument
+          const current = schedule?.find(v => v.taskId === event.id)
           handleTaskClick(current)
         }}
         contentHeight="auto"

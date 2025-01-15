@@ -2,14 +2,11 @@ import { Chatbot } from '@/components/Chatbot'
 import { Calendar } from '@/components/Home'
 import ChatIcon from '@mui/icons-material/Chat'
 import { Box, Fab } from '@mui/material'
-import { useState } from 'react'
+import { useToggle } from '@zl-asica/react'
 
 const Home = () => {
-  const [chatbotOpen, setChatbotOpen] = useState(false)
+  const [chatbotOpen, ToggleChatbotOpen] = useToggle()
 
-  const handleChatbotOpen = () => {
-    setChatbotOpen(true)
-  }
   return (
     <Box
       sx={{
@@ -24,16 +21,16 @@ const Home = () => {
       <Fab
         color="primary"
         aria-label="chat"
-        onClick={handleChatbotOpen}
+        onClick={ToggleChatbotOpen}
         sx={{
           position: 'fixed',
-          bottom: 32,
+          bottom: 80,
           right: 32,
         }}
       >
         <ChatIcon />
       </Fab>
-      <Chatbot open={chatbotOpen} onClose={() => setChatbotOpen(false)} />
+      <Chatbot open={chatbotOpen} onClose={ToggleChatbotOpen} />
     </Box>
   )
 }

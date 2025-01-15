@@ -2,7 +2,7 @@ import type { Dayjs } from 'dayjs'
 import { useScheduleStore } from '@/stores'
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material'
 import { generateUniqueId, useToggle } from '@zl-asica/react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 interface AddTaskButtonProps {
   selectedDate: Dayjs | null
@@ -11,12 +11,16 @@ interface AddTaskButtonProps {
 const AddTaskButton = ({ selectedDate }: AddTaskButtonProps) => {
   const addTask = useScheduleStore(state => state.addTask)
 
-  const [date, setDate] = useState(selectedDate?.format('YYYY-MM-DD') ?? '')
+  const [date, setDate] = useState(selectedDate?.format('YYYY-MM-DD') ?? Date.now().toString())
   const [open, toggleOpen] = useToggle()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState<TaskCategory>('work')
   const [priority, setPriority] = useState<TaskPriority>('medium')
+
+  useEffect(() => {
+    setDate(selectedDate?.format('YYYY-MM-DD') ?? Date.now().toString())
+  }, [selectedDate])
 
   return (
     <>

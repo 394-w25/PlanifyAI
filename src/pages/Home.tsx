@@ -1,4 +1,4 @@
-import { Chatbot } from '@/components/Chatbot'
+import Chatbot from '@/components/Chatbot'
 import { Calendar } from '@/components/Home'
 import ChatIcon from '@mui/icons-material/Chat'
 import { Box, Fab } from '@mui/material'

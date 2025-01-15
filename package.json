@@ -19,17 +19,30 @@
   "dependencies": {
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
+    "@fullcalendar/core": "^6.1.15",
+    "@fullcalendar/daygrid": "^6.1.15",
+    "@fullcalendar/interaction": "^6.1.15",
+    "@fullcalendar/react": "^6.1.15",
+    "@fullcalendar/timegrid": "^6.1.15",
     "@mui/icons-material": "^6.1.10",
     "@mui/material": "^6.1.10",
     "@mui/x-date-pickers": "^7.23.1",
+    "@toast-ui/react-calendar": "^2.1.3",
     "@zl-asica/react": "^0.3.10",
+    "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
+    "devextreme": "^24.2.3",
+    "devextreme-cli": "^1.8.0",
+    "devextreme-react": "^24.2.3",
+    "devextreme-themebuilder": "^24.2.3",
     "es-toolkit": "^1.29.0",
     "firebase": "^11.0.2",
     "react": "^19.0.0",
+    "react-big-calendar": "^1.17.1",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.0.2",
     "sonner": "^1.7.0",
+    "tui-calendar": "^1.15.3",
     "zustand": "^5.0.2"
   },
   "devDependencies": {
@@ -53,7 +66,7 @@
     "vite-plugin-checker": "^0.8.0",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^2.1.8"
-  },
+  } ,
   "lint-staged": {
     "src/**/*.{js,jsx,ts,tsx}": [
       "eslint --fix"

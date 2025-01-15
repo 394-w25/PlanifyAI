@@ -20,6 +20,8 @@ interface CustomDialogProps {
   description?: string
   actions?: DialogAction[] // Array of actions for buttons
   children?: React.ReactNode // Custom content
+  maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
+  fullWidth?: boolean
 }
 
 const defaultActions: DialogAction[] = []
@@ -31,6 +33,8 @@ const CustomDialog = ({
   description,
   actions = defaultActions,
   children,
+  maxWidth = 'md',
+  fullWidth = true,
 }: CustomDialogProps) => {
   return (
     <Dialog
@@ -38,6 +42,8 @@ const CustomDialog = ({
       onClose={onClose}
       aria-labelledby="custom-dialog-title"
       aria-describedby="custom-dialog-description"
+      maxWidth={maxWidth}
+      fullWidth={fullWidth}
     >
       <DialogTitle id="custom-dialog-title">{title}</DialogTitle>
       <DialogContent>

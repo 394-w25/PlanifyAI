@@ -3,58 +3,104 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
+import { Box } from '@mui/material'
 import { useToggle } from '@zl-asica/react'
 import dayjs from 'dayjs'
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
 import TaskDialog from './TaskDialog'
-
-import './WeekCalendar.less'
 
 interface ScheduleCalendarProps {
   schedule: Schedule
   setSelectedDate: (date: Dayjs) => void
 }
 
-interface DateClickArg {
-  dateStr: string
+const calendarStyles = {
+  'maxWidth': '100%',
+  'boxSizing': 'border-box',
+  'padding': '0 12px',
+  'marginBottom': '30px',
+  '& .fc-timeGridWeek-button, & .fc-dayGridMonth-button, & .fc-next-button, & .fc-prev-button': {
+    fontSize: '12px',
+    backgroundColor: '#4E2A84 !important',
+  },
+  '& .fc-toolbar-title': {
+    fontSize: '16px',
+  },
+}
+
+const computeHighlightedDays = (schedule: Schedule) => {
+  return schedule.map((task) => {
+    const start = task.timeRange
+      ? `${task.date}T${task.timeRange.start}`
+      : task.date
+    const end = task.timeRange
+      ? `${task.date}T${task.timeRange.end}`
+      : undefined
+
+    return {
+      ...task,
+      id: task.taskId,
+      start,
+      end,
+      backgroundColor: '#4E2A84',
+      borderColor: '#4E2A84',
+    }
+  })
+}
+
+const computeTimeRange = (schedule: Schedule, defaultStart: string, defaultEnd: string) => {
+  let earliestTime = defaultStart
+  let latestTime = defaultEnd
+
+  schedule.forEach((task) => {
+    if (task.timeRange) {
+      if (task.timeRange.start < earliestTime) {
+        earliestTime = task.timeRange.start
+      }
+      if (task.timeRange.end > latestTime) {
+        latestTime = task.timeRange.end
+      }
+    }
+  })
+
+  return { slotMinTime: earliestTime, slotMaxTime: latestTime }
 }
 
 const CalendarComponent = ({ schedule, setSelectedDate }: ScheduleCalendarProps) => {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [open, toggleOpen] = useToggle()
 
-  const handleTaskClick = (task: Task | undefined) => {
+  const handleTaskClick = useCallback((task: Task | undefined) => {
     setSelectedTask(task ?? null)
     toggleOpen()
-  }
+  }, [toggleOpen])
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setSelectedTask(null)
     toggleOpen()
-  }
-  const highlightedDays = useMemo(() => {
-    return schedule
-      .map((task) => {
-        return {
-          ...task,
-          id: task.taskId,
-          start: task.date,
-          backgroundColor: '#4E2A84',
-          borderColor: '#4E2A84',
-        }
-      })
-      .filter(Boolean)
-  }, [schedule])
+  }, [toggleOpen])
 
-  const handleDateClick = (arg: DateClickArg) => {
-    setSelectedDate(dayjs(arg.dateStr))
-  }
+  const highlightedDays = useMemo(
+    () => computeHighlightedDays(schedule),
+    [schedule],
+  )
+
+  const timeRange = useMemo(
+    () => computeTimeRange(schedule, '08:00:00', '22:00:00'),
+    [schedule],
+  )
+
+  const handleEventClick = useCallback(
+    ({ event }: { event: { id: string } }) => {
+      const task = schedule.find(v => v.taskId === event.id)
+      handleTaskClick(task)
+    },
+    [schedule, handleTaskClick],
+  )
 
   return (
-    <div
-      className="wrapper"
-    >
+    <Box sx={calendarStyles}>
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
@@ -70,27 +116,20 @@ const CalendarComponent = ({ schedule, setSelectedDate }: ScheduleCalendarProps)
         dayHeaderFormat={{
           weekday: 'narrow',
         }}
-        dayHeaderClassNames="dayHeaderClassNames"
-        eventClassNames="eventClassNames"
-        eventClick={({ event }) => {
-          const current = schedule?.find(v => v.taskId === event.id)
-          handleTaskClick(current)
-        }}
+        eventClick={handleEventClick}
         contentHeight="auto"
+        slotMinTime={timeRange.slotMinTime}
+        slotMaxTime={timeRange.slotMaxTime}
         buttonText={{
           today: 'T',
           month: 'M',
           week: 'W',
           day: 'D',
         }}
-        dateClick={handleDateClick}
+        dateClick={arg => setSelectedDate(dayjs(arg.dateStr))}
       />
-      <TaskDialog
-        open={open}
-        selectedTask={selectedTask}
-        handleClose={handleClose}
-      />
-    </div>
+      <TaskDialog open={open} selectedTask={selectedTask} handleClose={handleClose} />
+    </Box>
   )
 }
 

@@ -9,9 +9,10 @@ lerna-debug.log*
 
 node_modules
 dist
+build
 dist-ssr
 *.local
-pnpm-lock.yaml
+.eslintcache
 
 # Editor directories and files
 .idea
@@ -23,3 +24,4 @@ pnpm-lock.yaml
 *.sw?
 
 .firebase
+.env

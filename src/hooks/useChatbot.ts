@@ -19,8 +19,7 @@ const useChatbot = () => {
   const [isLoading, setIsLoading] = useState(false)
 
   const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions'
-  // const DEEPSEEK_API_KEY = import.meta.env.VITE_API_KEY as string
-  const DEEPSEEK_API_KEY = 'sk-4089313ab7fc4c9a994e835a9318fa1b'
+  const DEEPSEEK_API_KEY = import.meta.env.VITE_API_KEY as string
 
   const SYSTEM_PROMPT = [
     'The user will describe a calendar event. Please try to understand the context, turn it into JSON and output in JSON format.',

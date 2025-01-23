@@ -5,14 +5,14 @@ on:
     branches:
       - main
     paths:
-      - 'src/**'
-      - 'public/**'
+      - "src/**"
+      - "public/**"
       - firebase.json
       - package.json
       - index.html
       - vitest.config.js
       - .firebaserc
-      - '.github/workflows/*'
+      - ".github/workflows/*"
 
 concurrency:
   group: firebase-deploy-${{ github.ref }}
@@ -32,7 +32,7 @@ jobs:
       - name: 🛠️ Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 'lts/*'
+          node-version: "lts/*"
           cache: npm
 
       # Step 3: Restore dependencies cache

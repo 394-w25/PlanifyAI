@@ -193,16 +193,16 @@ Interfaces are primarily used for objects that might be extended or combined wit
 // types.d.ts
 
 interface UserProfile {
-  id: string
-  username: string
-  email: string
-  avatarUrl?: string
-  bio?: string
+  id: string;
+  username: string;
+  email: string;
+  avatarUrl?: string;
+  bio?: string;
 }
 
 interface ProfileProps {
-  profile: UserProfile
-  onFollow: (userId: string) => void
+  profile: UserProfile;
+  onFollow: (userId: string) => void;
 }
 ```
 
@@ -236,11 +236,11 @@ Using `import type` for importing types makes it clear that the import is used o
 ```typescript
 // src/hooks/useUser.ts
 
-import type { UserContextType } from '@/types'
+import type { UserContextType } from "@/types";
 
 const useUser = () => {
   // usage of UserContextType in the hook
-}
+};
 ```
 
 Here, `import type { UserContextType }` indicates that `UserContextType` is used only for type checking, not at runtime. This avoids additional runtime imports and helps with bundling efficiency.
@@ -258,58 +258,55 @@ Here, `import type { UserContextType }` indicates that `UserContextType` is used
 1. **Enable Zustand Store**: Zustand stores are imported and initialized once for the entire application. For example, the `user` store:
 
    ```tsx
-   import { useUserStore } from '@/stores'
+   import { useUserStore } from "@/stores";
 
    const App = () => {
      const initializeAuthListener = useUserStore(
-       state => state.initializeAuthListener
-     )
+       (state) => state.initializeAuthListener,
+     );
 
      useEffect(() => {
-       const unsubscribe = initializeAuthListener()
-       return () => unsubscribe() // Cleanup listener on unmount
-     }, [initializeAuthListener])
+       const unsubscribe = initializeAuthListener();
+       return () => unsubscribe(); // Cleanup listener on unmount
+     }, [initializeAuthListener]);
 
-     return <>{/* App Components */}</>
-   }
+     return <>{/* App Components */}</>;
+   };
    ```
 
 2. **Access State in Components**: Use zustand hooks to fetch only the state you need. This ensures efficient re-rendering.
 
    ```tsx
-   import { useUserStore } from '@/stores'
+   import { useUserStore } from "@/stores";
 
    const MyComponent = () => {
-     const user = useUserStore(state => state.user)
-     const loading = useUserStore(state => state.loading)
+     const user = useUserStore((state) => state.user);
+     const loading = useUserStore((state) => state.loading);
 
-     return user
-       ? (
-           <div>
-             <h1>
-               Welcome,
-               {user.displayName}
-             </h1>
-             <button onClick={() => useUserStore.getState().logout()}>
-               Sign Out
-             </button>
-           </div>
-         )
-       : loading
-         ? (
-             <p>Loading...</p>
-           )
-         : (
-             <button
-               onClick={() =>
-                 useUserStore
-                   .getState()
-                   .login('donor', () => console.log('Logged in'))}
-             >
-               Sign In
-             </button>
-           )
-   }
+     return user ? (
+       <div>
+         <h1>
+           Welcome,
+           {user.displayName}
+         </h1>
+         <button onClick={() => useUserStore.getState().logout()}>
+           Sign Out
+         </button>
+       </div>
+     ) : loading ? (
+       <p>Loading...</p>
+     ) : (
+       <button
+         onClick={() =>
+           useUserStore
+             .getState()
+             .login("donor", () => console.log("Logged in"))
+         }
+       >
+         Sign In
+       </button>
+     );
+   };
    ```
 
 ---
@@ -319,15 +316,15 @@ Here, `import type { UserContextType }` indicates that `UserContextType` is used
 To update the user's profile or other states, zustand provides centralized actions that automatically update Firebase and sync the changes with the store:
 
 ```tsx
-import useUserStore from '@/stores/useUserStore'
+import useUserStore from "@/stores/useUserStore";
 
 const MyComponent = () => {
-  const updateProfile = useUserStore(state => state.updateProfile)
+  const updateProfile = useUserStore((state) => state.updateProfile);
 
   const handleUpdate = () => {
-    updateProfile({ displayName: 'New Name' }) // Updates profile in Firebase and zustand
-  }
+    updateProfile({ displayName: "New Name" }); // Updates profile in Firebase and zustand
+  };
 
-  return <button onClick={handleUpdate}>Update Profile</button>
-}
+  return <button onClick={handleUpdate}>Update Profile</button>;
+};
 ```

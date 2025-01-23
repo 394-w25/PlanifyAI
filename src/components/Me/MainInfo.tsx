@@ -18,7 +18,12 @@ const MainInfo = ({
   onChangeEmail,
 }: MainInfoProps) => {
   return (
-    <Box>
+    <Box
+      sx={{
+        maxWidth: 400,
+        mx: 'auto',
+      }}
+    >
       <Box display="flex" justifyContent="center" mb={3}>
         <Avatar
           src={userData?.profilePic ?? ''}

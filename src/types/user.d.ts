@@ -34,7 +34,7 @@ interface Task {
   priority: TaskPriority
   status: 'pending' | 'completed'
   isRecurring: boolean
-  recurrencePattern: RecurrencePattern
+  recurrencePattern: RecurrencePattern | null
 }
 
 type Schedule = Task[]

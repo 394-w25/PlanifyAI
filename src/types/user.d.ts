@@ -18,6 +18,12 @@ interface TaskTimeRange {
   end: string
 }
 
+interface RecurrencePattern {
+  type: 'daily' | 'weekly' | 'monthly'
+  interval: number
+  endDate?: string
+}
+
 interface Task {
   taskId: string
   title: string
@@ -27,6 +33,8 @@ interface Task {
   timeRange?: TaskTimeRange
   priority: TaskPriority
   status: 'pending' | 'completed'
+  isRecurring: boolean
+  recurrencePattern: RecurrencePattern
 }
 
 type Schedule = Task[]

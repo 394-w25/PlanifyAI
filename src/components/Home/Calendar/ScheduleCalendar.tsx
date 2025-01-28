@@ -1,3 +1,4 @@
+/* eslint-disable ts/strict-boolean-expressions */
 import type { PickersDayProps } from '@mui/x-date-pickers/PickersDay'
 import type { Dayjs } from 'dayjs'
 import Badge from '@mui/material/Badge'
@@ -10,14 +11,47 @@ import { useMemo } from 'react'
 
 const defaultHighlightedDays: string[] = []
 
+// Helper function to generate dates for recurring tasks
+const generateRecurringDates = (task: Task): string[] => {
+  if (!task.isRecurring || !task.recurrencePattern) {
+    return [task.date]
+  }
+
+  const dates: string[] = []
+  const startDate = dayjs(task.date)
+  const endDate = task.recurrencePattern.endDate
+    ? dayjs(task.recurrencePattern.endDate)
+    // If no end date, generate for next 6 months
+    : dayjs().add(6, 'month')
+
+  let currentDate = startDate
+  const { type, interval } = task.recurrencePattern
+
+  while (currentDate.isBefore(endDate) || currentDate.isSame(endDate, 'day')) {
+    dates.push(currentDate.format('YYYY-MM-DD'))
+
+    switch (type) {
+      case 'daily':
+        currentDate = currentDate.add(interval, 'day')
+        break
+      case 'weekly':
+        currentDate = currentDate.add(interval, 'week')
+        break
+      case 'monthly':
+        currentDate = currentDate.add(interval, 'month')
+        break
+    }
+  }
+
+  return dates
+}
+
 const ServerDay = (
   props: PickersDayProps<Dayjs> & { highlightedDays?: string[] },
 ) => {
   const { highlightedDays = defaultHighlightedDays, day, outsideCurrentMonth, ...other } = props
 
-  const isSelected
-    = !outsideCurrentMonth
-    && highlightedDays.includes(day.format('YYYY-MM-DD'))
+  const isSelected = !outsideCurrentMonth && highlightedDays.includes(day.format('YYYY-MM-DD'))
 
   return (
     <Badge
@@ -46,13 +80,12 @@ interface ScheduleCalendarProps {
 }
 
 const ScheduleCalendar = ({ schedule, setSelectedDate }: ScheduleCalendarProps) => {
-  // Extract unique days with tasks
+  // Generate all dates including recurring ones
   const highlightedDays = useMemo(() => {
-    return schedule
-      .map((task) => {
-        return dayjs(task.date).format('YYYY-MM-DD')
-      })
-      .filter(Boolean)
+    const allDates = schedule.flatMap(task => generateRecurringDates(task))
+
+    // Remove duplicates and sort
+    return [...new Set(allDates)].sort()
   }, [schedule])
 
   return (

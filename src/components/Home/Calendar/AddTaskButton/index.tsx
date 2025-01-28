@@ -8,9 +8,11 @@ import {
   DialogContent,
   DialogTitle,
   FormControl,
+  FormControlLabel,
   InputLabel,
   MenuItem,
   Select,
+  Switch,
 } from '@mui/material'
 import { generateUniqueId, useToggle } from '@zl-asica/react'
 import { useCallback, useEffect, useState } from 'react'
@@ -35,6 +37,12 @@ const AddTaskButton = ({ selectedDate }: AddTaskButtonProps) => {
   const [endTime, setEndTime] = useState('')
   const [loading, setLoading] = useState(false)
 
+  // New recurring task states
+  const [isRecurring, setIsRecurring] = useState(false)
+  const [recurrenceType, setRecurrenceType] = useState<'daily' | 'weekly' | 'monthly'>('daily')
+  const [recurrenceInterval, setRecurrenceInterval] = useState(1)
+  const [recurrenceEndDate, setRecurrenceEndDate] = useState('')
+
   useEffect(() => {
     setDate(selectedDate?.format('YYYY-MM-DD') ?? new Date().toISOString().split('T')[0])
   }, [selectedDate])
@@ -49,6 +57,10 @@ const AddTaskButton = ({ selectedDate }: AddTaskButtonProps) => {
     setDate(selectedDate?.format('YYYY-MM-DD') ?? new Date().toISOString().split('T')[0])
     setStartTime('')
     setEndTime('')
+    setIsRecurring(false)
+    setRecurrenceType('daily')
+    setRecurrenceInterval(1)
+    setRecurrenceEndDate('')
   }, [selectedDate])
 
   const handleAddTask = useCallback(async () => {
@@ -63,6 +75,14 @@ const AddTaskButton = ({ selectedDate }: AddTaskButtonProps) => {
       date,
       timeRange: startTime && endTime ? { start: startTime, end: endTime } : undefined,
       status: 'pending' as const,
+      isRecurring,
+      ...(isRecurring && {
+        recurrencePattern: {
+          type: recurrenceType,
+          interval: recurrenceInterval,
+          ...(recurrenceEndDate && { endDate: recurrenceEndDate }),
+        },
+      }),
     }
 
     try {
@@ -76,7 +96,22 @@ const AddTaskButton = ({ selectedDate }: AddTaskButtonProps) => {
     finally {
       setLoading(false)
     }
-  }, [title, description, category, priority, date, startTime, endTime, addTask, resetStates, toggleOpen])
+  }, [
+    title,
+    description,
+    category,
+    priority,
+    date,
+    startTime,
+    endTime,
+    isRecurring,
+    recurrenceType,
+    recurrenceInterval,
+    recurrenceEndDate,
+    addTask,
+    resetStates,
+    toggleOpen,
+  ])
 
   return (
     <>
@@ -107,6 +142,55 @@ const AddTaskButton = ({ selectedDate }: AddTaskButtonProps) => {
           <CustomInputField label="End Time" type="time" value={endTime} onChange={setEndTime} />
           <CustomInputField label="Title" type="text" value={title} onChange={setTitle} required />
           <CustomInputField label="Description" type="text" value={description} onChange={setDescription} />
+
+          <FormControlLabel
+            control={(
+              <Switch
+                checked={isRecurring}
+                onChange={e => setIsRecurring(e.target.checked)}
+              />
+            )}
+            label="Recurring Task"
+            sx={{ mt: 2, mb: 1 }}
+          />
+
+          {isRecurring && (
+            <>
+              <FormControl fullWidth margin="normal">
+                <InputLabel>Repeat</InputLabel>
+                <Select
+                  value={recurrenceType}
+                  onChange={e => setRecurrenceType(e.target.value as 'daily' | 'weekly' | 'monthly')}
+                >
+                  <MenuItem value="daily">Daily</MenuItem>
+                  <MenuItem value="weekly">Weekly</MenuItem>
+                  <MenuItem value="monthly">Monthly</MenuItem>
+                </Select>
+              </FormControl>
+
+              <FormControl fullWidth margin="normal">
+                <InputLabel>Every</InputLabel>
+                <Select
+                  value={recurrenceInterval}
+                  onChange={e => setRecurrenceInterval(Number(e.target.value))}
+                >
+                  {[1, 2, 3, 4, 5, 6, 7].map(num => (
+                    <MenuItem key={num} value={num}>
+                      {num}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <CustomInputField
+                label="End Date (Optional)"
+                type="date"
+                value={recurrenceEndDate}
+                onChange={setRecurrenceEndDate}
+                min={date} // Can't end before start date
+              />
+            </>
+          )}
 
           <FormControl fullWidth margin="normal">
             <InputLabel>Category *</InputLabel>

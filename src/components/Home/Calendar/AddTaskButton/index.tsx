@@ -76,13 +76,13 @@ const AddTaskButton = ({ selectedDate }: AddTaskButtonProps) => {
       timeRange: startTime && endTime ? { start: startTime, end: endTime } : undefined,
       status: 'pending' as const,
       isRecurring,
-      ...(isRecurring && {
-        recurrencePattern: {
-          type: recurrenceType,
-          interval: recurrenceInterval,
-          ...(recurrenceEndDate && { endDate: recurrenceEndDate }),
-        },
-      }),
+      recurrencePattern: isRecurring
+        ? {
+            type: recurrenceType,
+            interval: recurrenceInterval,
+            ...(recurrenceEndDate && { endDate: recurrenceEndDate }),
+          }
+        : null,
     }
 
     try {
@@ -187,7 +187,6 @@ const AddTaskButton = ({ selectedDate }: AddTaskButtonProps) => {
                 type="date"
                 value={recurrenceEndDate}
                 onChange={setRecurrenceEndDate}
-                min={date} // Can't end before start date
               />
             </>
           )}

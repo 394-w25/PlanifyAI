@@ -24,14 +24,20 @@ const useScheduleStore = create<ScheduleState>()(
       error: null,
 
       fetchSchedule: async (userId) => {
+        if (!userId) {
+          console.warn('fetchSchedule called without a valid userId.')
+          return
+        }
+
         try {
-          set({ loading: true })
+          set({ loading: true, error: null })
           const tasks = await getSchedule(userId)
-          set({ userId, schedule: tasks, error: null })
+          set({ userId, schedule: tasks })
         }
         catch (error_) {
           console.error('Error fetching schedule:', error_)
           set({ error: 'Failed to load schedule.' })
+          toast.error('Failed to load schedule.')
         }
         finally {
           set({ loading: false })
@@ -43,50 +49,68 @@ const useScheduleStore = create<ScheduleState>()(
       },
 
       updateTask: async (updatedTask) => {
+        const userId = get().userId
+        if (!userId) {
+          console.warn('updateTask called without a valid userId.')
+          return
+        }
+
         try {
-          const userId = get().userId
           await updateTask(userId, updatedTask)
+
           set(state => ({
             schedule: state.schedule.map(task =>
               task.taskId === updatedTask.taskId ? updatedTask : task,
             ),
-            error: null,
           }))
-          toast.success(`Task "${updatedTask.title}" updated successfully!`)
+
+          toast.success(`Task updated: "${updatedTask.title}"`)
         }
         catch (error_) {
           console.error('Error updating task:', error_)
           set({ error: 'Failed to update task.' })
-          toast.error(`Failed to update task "${updatedTask.title}".`)
+          toast.error(`Failed to update: "${updatedTask.title}".`)
         }
       },
 
       addTask: async (newTask) => {
+        const userId = get().userId
+        if (!userId) {
+          console.warn('addTask called without a valid userId.')
+          return
+        }
+
         try {
-          const userId = get().userId
           await addTask(userId, newTask)
+
           set(state => ({
             schedule: [...state.schedule, newTask],
-            error: null,
           }))
-          toast.success(`Task "${newTask.title}" added successfully!`)
+
+          toast.success(`Task added: "${newTask.title}"`)
         }
         catch (error_) {
           console.error('Error adding task:', error_)
           set({ error: 'Failed to add task.' })
-          toast.error(`Failed to add task "${newTask.title}".`)
+          toast.error(`Failed to add: "${newTask.title}".`)
         }
       },
 
       deleteTask: async (taskId) => {
+        const userId = get().userId
+        if (!userId) {
+          console.warn('deleteTask called without a valid userId.')
+          return
+        }
+
         try {
-          const userId = get().userId
           await deleteTask(userId, taskId)
+
           set(state => ({
             schedule: state.schedule.filter(task => task.taskId !== taskId),
-            error: null,
           }))
-          toast.success('Task deleted successfully!')
+
+          toast.success('Task deleted.')
         }
         catch (error_) {
           console.error('Error deleting task:', error_)

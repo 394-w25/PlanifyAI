@@ -18,7 +18,7 @@ const getUserProfile = async (
     role: 'user' as UserType,
   } as UserProfile
 
-  const userProfile = await getOrCreateDocument<UserProfile>(uid, defaultProfile)
+  const userProfile = await getOrCreateDocument(uid, 'users', defaultProfile)
 
   await navigate('/')
 

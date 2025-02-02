@@ -77,7 +77,11 @@ const generateRecurringEvents = (task: Task) => {
       case 'monthly':
         currentDate = currentDate.add(interval, 'month')
         break
+    }
+  }
+  return events 
 }
+
 
 const computeHighlightedDays = (schedule: Schedule) => {
   return schedule.flatMap(task => generateRecurringEvents(task))

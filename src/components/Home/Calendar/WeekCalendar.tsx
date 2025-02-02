@@ -109,7 +109,7 @@ const computeHighlightedDays = (schedule: Schedule) => {
   }
 
   return events
-}
+},
 
 const computeHighlightedDays = (schedule: Schedule) => {
   return schedule.flatMap(task => generateRecurringEvents(task))

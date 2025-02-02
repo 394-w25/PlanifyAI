@@ -77,39 +77,7 @@ const generateRecurringEvents = (task: Task) => {
       case 'monthly':
         currentDate = currentDate.add(interval, 'month')
         break
-
-const computeHighlightedDays = (schedule: Schedule) => {
-  return schedule.map((task) => {
-    const start = task.timeRange
-      ? `${task.date}T${task.timeRange.start}`
-      : task.date
-    const end = task.timeRange
-      ? `${task.date}T${task.timeRange.end}`
-      : undefined
-
-    const categoryColors: Record<string, string> = {
-      work: '#D35400',
-      personal: '#3498DB',
-      health: '#27AE60',
-      learning: '#F1C40F',
-      other: '#95A5A6',
-      school: '#9B59B6',
-      default: '#4E2A84',
-
-    }
-
-    return {
-      ...task,
-      id: task.taskId,
-      start,
-      end,
-      backgroundColor: categoryColors[task.category] || categoryColors.default,
-      borderColor: categoryColors[task.category] || categoryColors.default,
-    }
-  }
-
-  return events
-},
+}
 
 const computeHighlightedDays = (schedule: Schedule) => {
   return schedule.flatMap(task => generateRecurringEvents(task))

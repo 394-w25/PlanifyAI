@@ -5,6 +5,7 @@ import { useToggle } from '@zl-asica/react'
 import dayjs from 'dayjs'
 import { useState } from 'react'
 import TaskDialog from './TaskDialog'
+import UpdateTaskDialog from './UpdateTaskDialog'
 
 interface TaskListProps {
   tasks: Task[]
@@ -13,6 +14,7 @@ interface TaskListProps {
 const TaskList = ({ tasks }: TaskListProps) => {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [open, toggleOpen] = useToggle(false)
+  const [updateOpen, toggleUpdateOpen] = useToggle(false)
 
   const handleTaskClick = (task: Task) => {
     setSelectedTask(task)
@@ -55,7 +57,19 @@ const TaskList = ({ tasks }: TaskListProps) => {
                     {dayjs(task.date).format('MMMM D, YYYY, h:mm A')}
                   </Typography>
                 </Box>
-
+                <IconButton
+                  color="primary"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setSelectedTask(task)
+                    toggleUpdateOpen()
+                  }}
+                  sx={{ fontSize: 12, display: 'flex', flexDirection: 'column' }}
+                >
+                  <CalendarMonth fontSize="large" />
+                  Edit
+                </IconButton>
+                {/* <UpdateTaskButton task={task} /> */}
                 <IconButton
                   color="primary"
                   onClick={(e) => {
@@ -76,6 +90,7 @@ const TaskList = ({ tasks }: TaskListProps) => {
               </Typography>
             )}
       </Box>
+      <UpdateTaskDialog open={updateOpen} task={selectedTask} handleClose={toggleUpdateOpen} />
 
       <TaskDialog open={open} selectedTask={selectedTask} handleClose={handleClose} />
     </>

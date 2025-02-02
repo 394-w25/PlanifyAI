@@ -1,5 +1,8 @@
+import { SmallLoadingCircle } from '@/components/common'
+import { useScheduleStore } from '@/stores'
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material'
 import dayjs from 'dayjs'
+import { useCallback, useState } from 'react'
 
 interface TaskDialogProps {
   open: boolean
@@ -9,6 +12,8 @@ interface TaskDialogProps {
 
 const TaskDialog = ({ open, selectedTask, handleClose }: TaskDialogProps) => {
   let actualDateTime = dayjs(selectedTask?.date).format('MMMM D, YYYY')
+  const deleteTask = useScheduleStore(state => state.deleteTask)
+  const [loading, setLoading] = useState(false)
 
   if (selectedTask?.timeRange) {
     const [hour, minute] = selectedTask.timeRange.start.split(':').map(Number)
@@ -18,6 +23,22 @@ const TaskDialog = ({ open, selectedTask, handleClose }: TaskDialogProps) => {
 
     actualDateTime = `${formattedHour}${formattedMinute} ${isPM ? 'PM' : 'AM'}, ${actualDateTime}`
   }
+
+  const handleDeleteTask = useCallback(async () => {
+    setLoading(true)
+    try {
+      if (selectedTask) {
+        await deleteTask(selectedTask.taskId)
+      }
+    }
+    catch (error_) {
+      console.error('Error while delete task:', error_)
+    }
+    finally {
+      handleClose()
+      setLoading(false)
+    }
+  }, [deleteTask, handleClose, selectedTask])
 
   return (
     <Dialog
@@ -52,6 +73,9 @@ const TaskDialog = ({ open, selectedTask, handleClose }: TaskDialogProps) => {
         )}
       </DialogContent>
       <DialogActions>
+        <Button onClick={handleDeleteTask} color="error">
+          {loading ? <SmallLoadingCircle text="Delete..." /> : 'Delete'}
+        </Button>
         <Button onClick={handleClose} color="primary">
           Close
         </Button>

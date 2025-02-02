@@ -15,6 +15,9 @@ const ServerDay = (
 ) => {
   const { highlightedDays = defaultHighlightedDays, day, outsideCurrentMonth, ...other } = props
 
+  // eslint-disable-next-line no-console
+  console.log('Rendering day:', day.format('YYYY-MM-DD'))
+
   const isSelected
     = !outsideCurrentMonth
     && highlightedDays.includes(day.format('YYYY-MM-DD'))
@@ -27,7 +30,8 @@ const ServerDay = (
       sx={{
         '& .MuiBadge-badge': {
           fontSize: '30px',
-          color: theme => theme.palette.primary.main,
+          backgroundColor: isSelected ? 'lightgreen' : 'transparent',
+          color: theme => (isSelected ? 'black' : theme.palette.primary.main),
         },
       }}
     >

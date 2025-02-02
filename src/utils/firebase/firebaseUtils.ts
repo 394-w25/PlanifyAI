@@ -7,15 +7,17 @@ import { db } from './firebaseConfig'
  * Get a document from Firestore or create it if it doesn't exist.
  *
  * @param uid The unique identifier for the document.
+ * @param collection The collection to get or create the document in.
  * @param defaultData The default data to create the document with if it doesn't exist.
  * @returns The existing or newly created document data.
  */
 const getOrCreateDocument = async <T extends WithFieldValue<DocumentData>>(
   uid: string,
+  collection: string,
   defaultData: T,
 ): Promise<T | undefined> => {
   try {
-    const docRef = doc(db, 'users', uid)
+    const docRef = doc(db, collection, uid)
     const docSnap = await getDoc(docRef)
 
     if (docSnap.exists()) {
@@ -35,15 +37,17 @@ const getOrCreateDocument = async <T extends WithFieldValue<DocumentData>>(
  * Update a document in Firestore.
  *
  * @param uid The unique identifier for the document.
+ * @param collection The collection to update the document in.
  * @param updates The data to update in the document.
  * @returns A promise that resolves when the update is complete.
  */
 const updateDocument = async <T>(
   uid: string,
+  collection: string,
   updates: Partial<T>,
 ): Promise<void> => {
   try {
-    const docRef = doc(db, 'users', uid)
+    const docRef = doc(db, collection, uid)
     await setDoc(docRef, updates, { merge: true }) // Merge updates with existing data
   }
   catch (error) {

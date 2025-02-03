@@ -1,3 +1,4 @@
+import type { SxProps, Theme } from '@mui/material'
 import { TextField } from '@mui/material'
 
 interface CustomInputFieldProps {
@@ -6,6 +7,7 @@ interface CustomInputFieldProps {
   value: string
   onChange: (value: string) => void
   required?: boolean
+  sx?: SxProps<Theme>
 }
 
 const CustomInputField = ({
@@ -14,6 +16,7 @@ const CustomInputField = ({
   value,
   onChange,
   required = false,
+  sx,
 }: CustomInputFieldProps) => (
   <TextField
     label={label}
@@ -26,6 +29,7 @@ const CustomInputField = ({
     slotProps={{
       inputLabel: { shrink: true },
     }}
+    sx={sx}
   />
 )
 

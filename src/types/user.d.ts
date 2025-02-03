@@ -37,6 +37,10 @@ interface Task {
   recurrencePattern: RecurrencePattern | null
 }
 
+type TaskAction =
+  | { type: 'SET_FIELD', field: keyof Task, value: any }
+  | { type: 'RESET', selectedDate: string }
+
 type Schedule = Task[]
 
 interface AutoScheduleInput {

@@ -18,6 +18,12 @@ interface TaskTimeRange {
   end: string
 }
 
+interface RecurrencePattern {
+  type: 'daily' | 'weekly' | 'monthly'
+  interval: number
+  endDate?: string
+}
+
 interface Task {
   taskId: string
   title: string
@@ -27,7 +33,13 @@ interface Task {
   timeRange?: TaskTimeRange
   priority: TaskPriority
   status: 'pending' | 'completed'
+  isRecurring: boolean
+  recurrencePattern: RecurrencePattern | null
 }
+
+type TaskAction =
+  | { type: 'SET_FIELD', field: keyof Task, value: any }
+  | { type: 'RESET', selectedDate: string }
 
 type Schedule = Task[]
 

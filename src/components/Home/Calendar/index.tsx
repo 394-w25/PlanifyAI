@@ -5,11 +5,10 @@ import { Box } from '@mui/material'
 import dayjs from 'dayjs'
 import { useState } from 'react'
 import AddTaskButton from './AddTaskButton'
+import CalendarComponent from './CalendarComponent'
 import ExportWholeCalendar from './ExportWholeCalendar'
-// import ScheduleCalendar from './ScheduleCalendar'
-import TaskList from './TaskList'
 
-import WeekCalendar from './WeekCalendar'
+import TaskList from './TaskList'
 
 const Schedule = () => {
   const schedule = useScheduleStore(state => state.schedule)
@@ -31,9 +30,7 @@ const Schedule = () => {
         alignItems: 'center',
       }}
     >
-      <WeekCalendar schedule={schedule} setSelectedDate={setSelectedDate} />
-
-      {/* <ScheduleCalendar schedule={schedule} setSelectedDate={setSelectedDate} /> */}
+      <CalendarComponent schedule={schedule} setSelectedDate={setSelectedDate} />
 
       <ExportWholeCalendar />
 

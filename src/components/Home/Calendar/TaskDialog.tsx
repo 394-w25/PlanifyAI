@@ -1,3 +1,4 @@
+/* eslint-disable ts/strict-boolean-expressions */
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material'
 import dayjs from 'dayjs'
 
@@ -9,14 +10,24 @@ interface TaskDialogProps {
 
 const TaskDialog = ({ open, selectedTask, handleClose }: TaskDialogProps) => {
   let actualDateTime = dayjs(selectedTask?.date).format('MMMM D, YYYY')
-
   if (selectedTask?.timeRange) {
     const [hour, minute] = selectedTask.timeRange.start.split(':').map(Number)
     const isPM = hour >= 12
-    const formattedHour = isPM ? hour - 12 || 12 : hour || 12 // Converts 0 to 12 for AM/PM notation
+    const formattedHour = isPM ? hour - 12 || 12 : hour || 12
     const formattedMinute = minute ? `:${minute.toString().padStart(2, '0')}` : ''
-
     actualDateTime = `${formattedHour}${formattedMinute} ${isPM ? 'PM' : 'AM'}, ${actualDateTime}`
+  }
+
+  const getRecurrenceText = (pattern: RecurrencePattern): string => {
+    const intervalText = pattern.interval === 1 ? '' : `every ${pattern.interval} `
+    const typeText = `${pattern.type}${pattern.interval === 1 ? 'ly' : 's'}`
+    let text = `Repeats ${intervalText}${typeText}`
+
+    if (pattern.endDate) {
+      text += ` until ${dayjs(pattern.endDate).format('MMMM D, YYYY')}`
+    }
+
+    return text
   }
 
   return (
@@ -39,6 +50,17 @@ const TaskDialog = ({ open, selectedTask, handleClose }: TaskDialogProps) => {
             <Typography>
               {actualDateTime}
             </Typography>
+
+            {selectedTask.isRecurring && selectedTask.recurrencePattern && (
+              <>
+                <Typography variant="subtitle1" fontWeight="bold" mt={2}>
+                  Recurrence:
+                </Typography>
+                <Typography>
+                  {getRecurrenceText(selectedTask.recurrencePattern)}
+                </Typography>
+              </>
+            )}
 
             {selectedTask.description !== '' && (
               <>

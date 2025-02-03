@@ -1,20 +1,13 @@
 import type { Dayjs } from 'dayjs'
 import { SmallLoadingCircle } from '@/components/common'
+import { CustomInputField, CustomSelectField } from '@/components/common/UI'
+import { useTaskReducer } from '@/hooks/useTaskReducer'
+import { useTimeManagement } from '@/hooks/useTimeManagement'
 import { useScheduleStore } from '@/stores'
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-} from '@mui/material'
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, Switch } from '@mui/material'
 import { generateUniqueId, useToggle } from '@zl-asica/react'
-import { useCallback, useEffect, useState } from 'react'
-import CustomInputField from './CustomInputField'
+import { useCallback } from 'react'
+import RecurringTaskOptions from './RecurringTaskOptions'
 
 interface AddTaskButtonProps {
   selectedDate: Dayjs | null
@@ -22,61 +15,47 @@ interface AddTaskButtonProps {
 
 const AddTaskButton = ({ selectedDate }: AddTaskButtonProps) => {
   const addTask = useScheduleStore(state => state.addTask)
-
   const [open, toggleOpen] = useToggle()
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [category, setCategory] = useState<TaskCategory>('work')
-  const [priority, setPriority] = useState<TaskPriority>('medium')
-  const [date, setDate] = useState(
-    selectedDate?.format('YYYY-MM-DD') ?? new Date().toISOString().split('T')[0],
-  )
-  const [startTime, setStartTime] = useState('')
-  const [endTime, setEndTime] = useState('')
-  const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    setDate(selectedDate?.format('YYYY-MM-DD') ?? new Date().toISOString().split('T')[0])
-  }, [selectedDate])
-
-  const isTimeRangeValid = !startTime || !endTime || startTime < endTime
-
-  const resetStates = useCallback(() => {
-    setTitle('')
-    setDescription('')
-    setCategory('work')
-    setPriority('medium')
-    setDate(selectedDate?.format('YYYY-MM-DD') ?? new Date().toISOString().split('T')[0])
-    setStartTime('')
-    setEndTime('')
-  }, [selectedDate])
+  const { state, dispatch, initialDate } = useTaskReducer({ selectedDate })
+  const { handleStartTimeChange, getEndTimeColor } = useTimeManagement(state, dispatch)
 
   const handleAddTask = useCallback(async () => {
-    setLoading(true)
-    const randomId = await generateUniqueId([title, description, category, priority])
-    const newTask = {
-      taskId: randomId,
-      title,
-      description,
-      category,
-      priority,
-      date,
-      timeRange: startTime && endTime ? { start: startTime, end: endTime } : undefined,
-      status: 'pending' as const,
+    dispatch({
+      type: 'SET_FIELD',
+      field: 'taskId',
+      value: await generateUniqueId([
+        state.title,
+        state.description,
+        state.category,
+        state.priority,
+      ]),
+    })
+
+    const newTask: Task = {
+      ...state,
+      timeRange: state.timeRange
+        && state.timeRange.start && state.timeRange.end && state.timeRange.start !== '' && state.timeRange.end !== ''
+        ? state.timeRange
+        : undefined,
+      recurrencePattern: state.isRecurring
+        ? {
+            type: state.recurrencePattern?.type || 'daily',
+            interval: state.recurrencePattern?.interval ?? 1,
+            endDate: state.recurrencePattern?.endDate,
+          }
+        : null,
     }
 
     try {
       await addTask(newTask)
       toggleOpen()
-      resetStates()
+      dispatch({ type: 'RESET', selectedDate: initialDate })
     }
-    catch (error_) {
-      console.error('Error while adding task:', error_)
+    catch (error) {
+      console.error('Error adding task:', error)
     }
-    finally {
-      setLoading(false)
-    }
-  }, [title, description, category, priority, date, startTime, endTime, addTask, resetStates, toggleOpen])
+  }, [state, addTask, toggleOpen, initialDate, dispatch])
 
   return (
     <>
@@ -92,63 +71,108 @@ const AddTaskButton = ({ selectedDate }: AddTaskButtonProps) => {
       >
         Add Task
       </Button>
-
-      <Dialog
-        open={open}
-        onClose={() => {
-          toggleOpen()
-          resetStates()
-        }}
-      >
+      <Dialog open={open} onClose={toggleOpen} fullWidth maxWidth="sm">
         <DialogTitle>Add Task</DialogTitle>
         <DialogContent>
-          <CustomInputField label="Date" type="date" value={date} onChange={setDate} required />
-          <CustomInputField label="Start Time" type="time" value={startTime} onChange={setStartTime} />
-          <CustomInputField label="End Time" type="time" value={endTime} onChange={setEndTime} />
-          <CustomInputField label="Title" type="text" value={title} onChange={setTitle} required />
-          <CustomInputField label="Description" type="text" value={description} onChange={setDescription} />
+          <CustomInputField
+            label="Date"
+            type="date"
+            value={state.date}
+            onChange={val => dispatch({
+              type: 'SET_FIELD',
+              field: 'date',
+              value: val,
+            })}
+            required
+          />
 
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Category *</InputLabel>
-            <Select
-              value={category}
-              onChange={event_ => setCategory(event_.target.value as TaskCategory)}
-            >
-              <MenuItem value="work">Work</MenuItem>
-              <MenuItem value="personal">Personal</MenuItem>
-              <MenuItem value="health">Health</MenuItem>
-              <MenuItem value="learning">Learning</MenuItem>
-              <MenuItem value="other">Other</MenuItem>
-              <MenuItem value="school">School</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Priority *</InputLabel>
-            <Select
-              value={priority}
-              onChange={event_ => setPriority(event_.target.value as TaskPriority)}
-            >
-              <MenuItem value="low">Low</MenuItem>
-              <MenuItem value="medium">Medium</MenuItem>
-              <MenuItem value="high">High</MenuItem>
-            </Select>
-          </FormControl>
+          <CustomInputField
+            label="Start Time"
+            type="time"
+            value={state.timeRange?.start ?? ''}
+            onChange={handleStartTimeChange}
+          />
+
+          <CustomInputField
+            label="End Time"
+            type="time"
+            value={state.timeRange?.end ?? ''}
+            onChange={val => dispatch({
+              type: 'SET_FIELD',
+              field: 'timeRange',
+              value: { ...state.timeRange, end: val },
+            })}
+            sx={{ color: getEndTimeColor }}
+          />
+
+          <CustomInputField
+            label="Title"
+            type="text"
+            value={state.title}
+            onChange={val => dispatch({
+              type: 'SET_FIELD',
+              field: 'title',
+              value: val,
+            })}
+            required
+          />
+          <CustomInputField
+            label="Description"
+            type="text"
+            value={state.description}
+            onChange={val => dispatch({
+              type: 'SET_FIELD',
+              field: 'description',
+              value: val,
+            })}
+          />
+
+          <CustomSelectField
+            label="Category"
+            value={state.category}
+            onChange={val => dispatch({
+              type: 'SET_FIELD',
+              field: 'category',
+              value: val,
+            })}
+            options={['work', 'personal', 'health', 'learning', 'other', 'school']}
+          />
+
+          <CustomSelectField
+            label="Priority"
+            value={state.priority}
+            onChange={val => dispatch({
+              type: 'SET_FIELD',
+              field: 'priority',
+              value: val,
+            })}
+            options={['low', 'medium', 'high']}
+          />
+
+          <FormControlLabel
+            control={(
+              <Switch
+                checked={state.isRecurring}
+                onChange={e => dispatch({
+                  type: 'SET_FIELD',
+                  field: 'isRecurring',
+                  value: e.target.checked,
+                })}
+              />
+            )}
+            label="Recurring Task"
+            sx={{ mt: 2, mb: 1 }}
+          />
+
+          {state.isRecurring
+          && <RecurringTaskOptions state={state} dispatch={dispatch} />}
         </DialogContent>
         <DialogActions>
-          <Button
-            onClick={() => {
-              toggleOpen()
-              resetStates()
-            }}
-            disabled={loading}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleAddTask}
-            disabled={!title.trim() || !date || !category || !priority || !isTimeRangeValid || loading}
-          >
-            {loading ? <SmallLoadingCircle text="Adding..." /> : 'Add Task'}
+          <Button onClick={toggleOpen}>Cancel</Button>
+          <Button onClick={handleAddTask}>
+            {state.taskId
+              ? <SmallLoadingCircle text="Adding..." />
+              : 'Add Task'}
           </Button>
         </DialogActions>
       </Dialog>

@@ -22,6 +22,11 @@ interface AddTaskButtonProps {
   selectedDate: Dayjs | null
 }
 
+interface TimeOption {
+  value: string
+  label: string
+}
+
 const AddTaskButton = ({ selectedDate }: AddTaskButtonProps) => {
   const addTask = useScheduleStore(state => state.addTask)
 
@@ -42,6 +47,15 @@ const AddTaskButton = ({ selectedDate }: AddTaskButtonProps) => {
   const [recurrenceType, setRecurrenceType] = useState<'daily' | 'weekly' | 'monthly'>('daily')
   const [recurrenceInterval, setRecurrenceInterval] = useState(1)
   const [recurrenceEndDate, setRecurrenceEndDate] = useState('')
+
+  // Generate time options in 30-minute intervals
+  const timeOptions: TimeOption[] = Array.from({ length: 48 }, (_, i) => {
+    const hour = Math.floor(i / 2)
+    const minute = (i % 2) * 30
+    const value = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
+    const label = `${hour === 0 ? 12 : hour > 12 ? hour - 12 : hour}:${minute.toString().padStart(2, '0')} ${hour >= 12 ? 'PM' : 'AM'}`
+    return { value, label }
+  })
 
   useEffect(() => {
     setDate(selectedDate?.format('YYYY-MM-DD') ?? new Date().toISOString().split('T')[0])
@@ -138,10 +152,45 @@ const AddTaskButton = ({ selectedDate }: AddTaskButtonProps) => {
         <DialogTitle>Add Task</DialogTitle>
         <DialogContent>
           <CustomInputField label="Date" type="date" value={date} onChange={setDate} required />
-          <CustomInputField label="Start Time" type="time" value={startTime} onChange={setStartTime} />
-          <CustomInputField label="End Time" type="time" value={endTime} onChange={setEndTime} />
           <CustomInputField label="Title" type="text" value={title} onChange={setTitle} required />
           <CustomInputField label="Description" type="text" value={description} onChange={setDescription} />
+
+          <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', marginBottom: '1rem' }}>
+            <FormControl fullWidth>
+              <InputLabel>Start Time</InputLabel>
+              <Select
+                value={startTime}
+                onChange={e => setStartTime(e.target.value)}
+                label="Start Time"
+              >
+                {timeOptions.map(option => (
+                  <MenuItem key={option.value} value={option.value}>
+                    {option.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <FormControl fullWidth>
+              <InputLabel>End Time</InputLabel>
+              <Select
+                value={endTime}
+                onChange={e => setEndTime(e.target.value)}
+                label="End Time"
+                error={!!startTime && !!endTime && startTime >= endTime}
+              >
+                {timeOptions.map(option => (
+                  <MenuItem
+                    key={option.value}
+                    value={option.value}
+                    disabled={startTime && option.value <= startTime}
+                  >
+                    {option.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </div>
 
           <FormControlLabel
             control={(
@@ -187,7 +236,7 @@ const AddTaskButton = ({ selectedDate }: AddTaskButtonProps) => {
                 type="date"
                 value={recurrenceEndDate}
                 onChange={setRecurrenceEndDate}
-                min={date} // Can't end before start date
+                min={date}
               />
             </>
           )}
@@ -206,6 +255,7 @@ const AddTaskButton = ({ selectedDate }: AddTaskButtonProps) => {
               <MenuItem value="school">School</MenuItem>
             </Select>
           </FormControl>
+
           <FormControl fullWidth margin="normal">
             <InputLabel>Priority *</InputLabel>
             <Select

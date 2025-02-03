@@ -50,11 +50,11 @@ export const useTaskReducer = ({ selectedDate, currentTask, open }: UseTaskReduc
 
   useEffect(() => {
     dispatch({ type: 'SET_FIELD', field: 'date', value: initialDate })
-  }, [selectedDate])
+  }, [initialDate])
 
   useEffect(() => {
     dispatch({ type: 'RESET', selectedDate: initialDate, currentTask })
-  }, [currentTask, open])
+  }, [currentTask, open, initialDate])
 
   return { state, dispatch, initialDate }
 }

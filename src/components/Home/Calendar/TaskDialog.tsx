@@ -120,7 +120,10 @@ const TaskDialog = ({ open, selectedTask, handleClose }: TaskDialogProps) => {
       <TaskInputDialog
         selectedDate={selectedTask ? dayjs(selectedTask.date) : dayjs()}
         open={editDialogOpen}
-        toggleOpen={toggleEditDialog}
+        toggleOpen={() => {
+          toggleEditDialog()
+          handleClose()
+        }}
         action="Edit"
         currentTask={selectedTask}
       />

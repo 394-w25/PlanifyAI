@@ -60,6 +60,7 @@ const useScheduleStore = create<ScheduleState>()(
         // Check whether actual modification is needed
         if (!currentTask || JSON.stringify(currentTask) === JSON.stringify(updatedTask)) {
           toast.info('No changes detected.')
+          return
         }
 
         try {

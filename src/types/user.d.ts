@@ -38,8 +38,8 @@ interface Task {
 }
 
 type TaskAction =
-  | { type: 'SET_FIELD', field: keyof Task, value: any }
-  | { type: 'RESET', selectedDate: string }
+  | { type: 'SET_FIELD', field: keyof Task, value: Task[keyof Task] }
+  | { type: 'RESET', selectedDate: string, currentTask?: Task | null }
 
 type Schedule = Task[]
 

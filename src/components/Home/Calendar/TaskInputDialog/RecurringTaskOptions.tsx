@@ -11,7 +11,7 @@ const RecurringTaskOptions = ({ state, dispatch }: RecurringTaskOptionsProps) =>
       type: 'SET_FIELD',
       field: 'recurrencePattern',
       value: {
-        ...state.recurrencePattern,
+        ...state.recurrencePattern ?? { type: 'daily', interval: 1 },
         [field]: value as RecurrencePattern[keyof RecurrencePattern],
       },
     })
@@ -21,14 +21,14 @@ const RecurringTaskOptions = ({ state, dispatch }: RecurringTaskOptionsProps) =>
     <>
       <CustomSelectField
         label="Repeat"
-        value={state.recurrencePattern?.type || 'daily'}
+        value={state.recurrencePattern?.type ?? 'daily'}
         onChange={val => handleRecurrenceChange('type', val)}
         options={['daily', 'weekly', 'monthly']}
       />
 
       <CustomSelectField
         label="Repeat On"
-        value={state.recurrencePattern?.interval ?? '1'}
+        value={state.recurrencePattern?.interval ?? 1}
         onChange={val => handleRecurrenceChange('interval', val)}
         options={[1, 2, 3, 4, 5, 6, 7]}
       />

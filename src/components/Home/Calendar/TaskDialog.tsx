@@ -1,8 +1,11 @@
 import { SmallLoadingCircle } from '@/components/common'
 import { useScheduleStore } from '@/stores'
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material'
+import EditIcon from '@mui/icons-material/Edit'
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Typography } from '@mui/material'
+import { useToggle } from '@zl-asica/react'
 import dayjs from 'dayjs'
 import { useCallback, useState } from 'react'
+import TaskInputDialog from './TaskInputDialog'
 
 interface TaskDialogProps {
   open: boolean
@@ -13,6 +16,7 @@ interface TaskDialogProps {
 const TaskDialog = ({ open, selectedTask, handleClose }: TaskDialogProps) => {
   const deleteTask = useScheduleStore(state => state.deleteTask)
   const [loading, setLoading] = useState(false)
+  const [editDialogOpen, toggleEditDialog] = useToggle()
 
   let actualDateTime = dayjs(selectedTask?.date).format('MMMM D, YYYY')
   if (selectedTask?.timeRange) {
@@ -52,57 +56,75 @@ const TaskDialog = ({ open, selectedTask, handleClose }: TaskDialogProps) => {
   }
 
   return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-    >
-      <DialogTitle>Task Details</DialogTitle>
-      <DialogContent>
-        {selectedTask && (
-          <>
-            <Typography variant="subtitle1" fontWeight="bold">
-              Title:
-            </Typography>
-            <Typography>{selectedTask.title}</Typography>
+    <>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+      >
+        <DialogTitle
+          sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', mr: 2,
+          }}
+        >
+          Task Details
+          <IconButton onClick={toggleEditDialog}>
+            <EditIcon fontSize="small" color="primary" />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          {selectedTask && (
+            <>
+              <Typography variant="subtitle1" fontWeight="bold">
+                Title:
+              </Typography>
+              <Typography>{selectedTask.title}</Typography>
 
-            <Typography variant="subtitle1" fontWeight="bold" mt={2}>
-              Date & Time:
-            </Typography>
-            <Typography>
-              {actualDateTime}
-            </Typography>
+              <Typography variant="subtitle1" fontWeight="bold" mt={2}>
+                Date & Time:
+              </Typography>
+              <Typography>
+                {actualDateTime}
+              </Typography>
 
-            {selectedTask.isRecurring && selectedTask.recurrencePattern && (
-              <>
-                <Typography variant="subtitle1" fontWeight="bold" mt={2}>
-                  Recurrence:
-                </Typography>
-                <Typography>
-                  {getRecurrenceText(selectedTask.recurrencePattern)}
-                </Typography>
-              </>
-            )}
+              {selectedTask.isRecurring && selectedTask.recurrencePattern && (
+                <>
+                  <Typography variant="subtitle1" fontWeight="bold" mt={2}>
+                    Recurrence:
+                  </Typography>
+                  <Typography>
+                    {getRecurrenceText(selectedTask.recurrencePattern)}
+                  </Typography>
+                </>
+              )}
 
-            {selectedTask.description !== '' && (
-              <>
-                <Typography variant="subtitle1" fontWeight="bold" mt={2}>
-                  Description:
-                </Typography>
-                <Typography>{selectedTask.description}</Typography>
-              </>
-            )}
-          </>
-        )}
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleDeleteTask} color="error">
-          {loading ? <SmallLoadingCircle text="Delete..." /> : 'Delete'}
-        </Button>
-        <Button onClick={handleClose} color="primary">
-          Close
-        </Button>
-      </DialogActions>
-    </Dialog>
+              {selectedTask.description !== '' && (
+                <>
+                  <Typography variant="subtitle1" fontWeight="bold" mt={2}>
+                    Description:
+                  </Typography>
+                  <Typography>{selectedTask.description}</Typography>
+                </>
+              )}
+            </>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteTask} color="error">
+            {loading ? <SmallLoadingCircle text="Delete..." /> : 'Delete'}
+          </Button>
+          <Button onClick={handleClose} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <TaskInputDialog
+        selectedDate={selectedTask ? dayjs(selectedTask.date) : dayjs()}
+        open={editDialogOpen}
+        toggleOpen={toggleEditDialog}
+        action="Edit"
+        currentTask={selectedTask}
+      />
+    </>
   )
 }
 

@@ -1,17 +1,20 @@
+import type { Dayjs } from 'dayjs'
 import { generateICSFile } from '@/utils/generateICSFile'
-import { CalendarMonth } from '@mui/icons-material'
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
+import EditIcon from '@mui/icons-material/Edit'
 import { Box, IconButton, Typography } from '@mui/material'
 import { useToggle } from '@zl-asica/react'
 import dayjs from 'dayjs'
 import { useState } from 'react'
 import TaskDialog from './TaskDialog'
-import UpdateTaskDialog from './UpdateTaskDialog'
+import TaskInputDialog from './TaskInputDialog'
 
 interface TaskListProps {
+  selectedDate: Dayjs
   tasks: Task[]
 }
 
-const TaskList = ({ tasks }: TaskListProps) => {
+const TaskList = ({ selectedDate, tasks }: TaskListProps) => {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [open, toggleOpen] = useToggle(false)
   const [updateOpen, toggleUpdateOpen] = useToggle(false)
@@ -66,10 +69,9 @@ const TaskList = ({ tasks }: TaskListProps) => {
                   }}
                   sx={{ fontSize: 12, display: 'flex', flexDirection: 'column' }}
                 >
-                  <CalendarMonth fontSize="large" />
+                  <EditIcon fontSize="medium" />
                   Edit
                 </IconButton>
-                {/* <UpdateTaskButton task={task} /> */}
                 <IconButton
                   color="primary"
                   onClick={(e) => {
@@ -78,8 +80,8 @@ const TaskList = ({ tasks }: TaskListProps) => {
                   }}
                   sx={{ fontSize: 12, display: 'flex', flexDirection: 'column' }}
                 >
-                  <CalendarMonth fontSize="large" />
-                  Export to Calendar
+                  <CalendarMonthIcon fontSize="medium" />
+                  Export
                 </IconButton>
               </Box>
             ))
@@ -90,7 +92,14 @@ const TaskList = ({ tasks }: TaskListProps) => {
               </Typography>
             )}
       </Box>
-      <UpdateTaskDialog open={updateOpen} task={selectedTask} handleClose={toggleUpdateOpen} />
+
+      <TaskInputDialog
+        selectedDate={selectedDate}
+        open={updateOpen}
+        toggleOpen={toggleUpdateOpen}
+        action="Edit"
+        currentTask={selectedTask}
+      />
 
       <TaskDialog open={open} selectedTask={selectedTask} handleClose={handleClose} />
     </>

@@ -1,20 +1,19 @@
 import type { Dayjs } from 'dayjs'
 import { useScheduleStore } from '@/stores'
-import { Box } from '@mui/material'
-
+import { Box, Button } from '@mui/material'
+import { useToggle } from '@zl-asica/react'
 import dayjs from 'dayjs'
 import { useState } from 'react'
-import AddTaskButton from './AddTaskButton'
+import CalendarComponent from './CalendarComponent'
 import ExportWholeCalendar from './ExportWholeCalendar'
-// import ScheduleCalendar from './ScheduleCalendar'
+import TaskInputDialog from './TaskInputDialog'
 import TaskList from './TaskList'
-
-import WeekCalendar from './WeekCalendar'
 
 const Schedule = () => {
   const schedule = useScheduleStore(state => state.schedule)
 
-  const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs())
+  const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs())
+  const [openAddTask, toggleOpenAddTask] = useToggle()
 
   const tasksForSelectedDate = schedule.filter(task =>
     dayjs(task.date).isSame(selectedDate, 'day'),
@@ -31,15 +30,31 @@ const Schedule = () => {
         alignItems: 'center',
       }}
     >
-      <WeekCalendar schedule={schedule} setSelectedDate={setSelectedDate} />
-
-      {/* <ScheduleCalendar schedule={schedule} setSelectedDate={setSelectedDate} /> */}
+      <CalendarComponent schedule={schedule} setSelectedDate={setSelectedDate} />
 
       <ExportWholeCalendar />
 
-      <AddTaskButton selectedDate={selectedDate} />
+      <Button
+        onClick={toggleOpenAddTask}
+        variant="contained"
+        sx={{
+          p: '0.5rem 1.5rem',
+          display: 'flex',
+          alignItems: 'center',
+          mb: '1rem',
+        }}
+      >
+        Add Task
+      </Button>
 
-      <TaskList tasks={tasksForSelectedDate} />
+      <TaskInputDialog
+        selectedDate={selectedDate}
+        open={openAddTask}
+        toggleOpen={toggleOpenAddTask}
+        action="Add"
+      />
+
+      <TaskList selectedDate={selectedDate} tasks={tasksForSelectedDate} />
 
     </Box>
   )

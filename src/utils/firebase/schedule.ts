@@ -33,7 +33,7 @@ const addTask = async (userId: string, newTask: Task): Promise<void> => {
   }
 }
 
-const deleteTask = async (taskId: string, userId: string): Promise<void> => {
+const deleteTask = async (userId: string, taskId: string): Promise<void> => {
   try {
     const userTasks = await getSchedule(userId)
     const updatedTasks = userTasks.filter(task => task.taskId !== taskId)

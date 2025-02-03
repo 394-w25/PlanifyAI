@@ -11,11 +11,17 @@ interface UserProfile {
 
 type TaskCategory = 'work' | 'personal' | 'health' | 'learning' | 'other' | 'school' | 'holiday'
 
-type TaskPriority = 'low' | 'medium' | 'high' | null
+type TaskPriority = 'low' | 'medium' | 'high'
 
 interface TaskTimeRange {
   start: string
   end: string
+}
+
+interface RecurrencePattern {
+  type: 'daily' | 'weekly' | 'monthly'
+  interval: number
+  endDate?: string
 }
 
 interface Task {
@@ -26,8 +32,14 @@ interface Task {
   date: string
   timeRange?: TaskTimeRange | null
   priority: TaskPriority
-  status: 'pending' | 'completed' | null
+  status: 'pending' | 'completed'
+  isRecurring: boolean
+  recurrencePattern: RecurrencePattern | null
 }
+
+type TaskAction =
+  | { type: 'SET_FIELD', field: keyof Task, value: Task[keyof Task] }
+  | { type: 'RESET', selectedDate: string, currentTask?: Task | null }
 
 type Schedule = Task[]
 

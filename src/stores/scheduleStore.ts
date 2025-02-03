@@ -55,6 +55,14 @@ const useScheduleStore = create<ScheduleState>()(
           return
         }
 
+        const currentTask = get().schedule.find(task => task.taskId === updatedTask.taskId)
+
+        // Check whether actual modification is needed
+        if (!currentTask || JSON.stringify(currentTask) === JSON.stringify(updatedTask)) {
+          toast.info('No changes detected.')
+          return
+        }
+
         try {
           await updateTask(userId, updatedTask)
 

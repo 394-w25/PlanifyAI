@@ -9,7 +9,6 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "start": "vite preview",
     "test": "vitest --ui",
     "test:ci": "vitest run",
     "lint": "eslint .",
@@ -29,7 +28,6 @@
     "@mui/icons-material": "^6.4.1",
     "@mui/material": "^6.4.1",
     "@mui/x-date-pickers": "^7.24.0",
-    "@swc/core": "^1.10.11",
     "@zl-asica/react": "^0.3.10",
     "dayjs": "^1.11.13",
     "es-toolkit": "^1.29.0",

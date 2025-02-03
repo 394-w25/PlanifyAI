@@ -4,16 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'src/**'
-      - 'public/**'
-      - firebase.json
-      - package.json
-      - index.html
-      - vitest.config.js
-      - .firebaserc
-      - '.github/workflows/*'
-
 
 concurrency:
   group: firebase-deploy-${{ github.ref }}

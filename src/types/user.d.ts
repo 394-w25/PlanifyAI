@@ -9,7 +9,7 @@ interface UserProfile {
   role: UserType
 }
 
-type TaskCategory = 'work' | 'personal' | 'health' | 'learning' | 'other' | 'school'
+type TaskCategory = 'work' | 'personal' | 'health' | 'learning' | 'other' | 'school' | 'holiday'
 
 type TaskPriority = 'low' | 'medium' | 'high'
 
@@ -30,7 +30,7 @@ interface Task {
   description: string
   category: TaskCategory
   date: string
-  timeRange?: TaskTimeRange
+  timeRange?: TaskTimeRange | null
   priority: TaskPriority
   status: 'pending' | 'completed'
   isRecurring: boolean

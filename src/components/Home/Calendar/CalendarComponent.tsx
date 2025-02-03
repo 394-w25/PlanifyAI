@@ -4,6 +4,7 @@ import { computeHighlightedDays, computeTimeRange } from '@/utils/calendar'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import FullCalendar from '@fullcalendar/react'
+import rrulePlugin from '@fullcalendar/rrule'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import { Box } from '@mui/material'
 import dayjs from 'dayjs'
@@ -47,7 +48,7 @@ const CalendarComponent = ({ schedule, setSelectedDate }: ScheduleCalendarProps)
     <Box sx={calendarStyles}>
       <FullCalendar
         key={selectedDate?.format('YYYY-MM-DD')}
-        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, rrulePlugin]}
         initialView="dayGridMonth"
         headerToolbar={{
           left: 'prev,next',

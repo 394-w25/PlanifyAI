@@ -19,6 +19,9 @@ export const useCalendarHandlers = (schedule: Schedule) => {
     ({ event }: { event: { id: string, extendedProps?: { originalTaskId?: string } } }) => {
       const taskId = event.extendedProps?.originalTaskId ?? event.id.split('-')[0]
       const task = schedule.find(v => v.taskId === taskId)
+      if (!task) {
+        return
+      }
       handleTaskClick(task)
     },
     [schedule, handleTaskClick],

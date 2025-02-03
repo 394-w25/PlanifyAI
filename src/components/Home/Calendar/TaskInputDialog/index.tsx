@@ -185,7 +185,7 @@ const TaskInputDialog = ({
         <Button onClick={handleTaskSubmitted}>
           {actionHappening
             ? <SmallLoadingCircle text={`${action}ing`} />
-            : `${action} Task`}
+            : action === 'Add' ? 'Add Task' : 'Confirm'}
         </Button>
       </DialogActions>
     </Dialog>

@@ -148,7 +148,7 @@ const TaskInputDialog = ({
             field: 'category',
             value: val,
           })}
-          options={['work', 'personal', 'health', 'learning', 'other', 'school', 'holiday']}
+          options={['work', 'personal', 'health', 'learning', 'other', 'school']}
         />
 
         <CustomSelectField

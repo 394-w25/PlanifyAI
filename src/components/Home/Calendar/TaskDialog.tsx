@@ -107,6 +107,7 @@ const TaskDialog = ({ open, selectedTask, handleClose }: TaskDialogProps) => {
             </>
           )}
         </DialogContent>
+
         <DialogActions>
           <Button onClick={handleDeleteTask} color="error">
             {loading ? <SmallLoadingCircle text="Delete..." /> : 'Delete'}

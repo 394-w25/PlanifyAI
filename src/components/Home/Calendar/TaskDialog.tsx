@@ -1,4 +1,3 @@
-/* eslint-disable ts/strict-boolean-expressions */
 import { SmallLoadingCircle } from '@/components/common'
 import { useScheduleStore } from '@/stores'
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material'
@@ -45,7 +44,7 @@ const TaskDialog = ({ open, selectedTask, handleClose }: TaskDialogProps) => {
     const typeText = `${pattern.type}${pattern.interval === 1 ? 'ly' : 's'}`
     let text = `Repeats ${intervalText}${typeText}`
 
-    if (pattern.endDate) {
+    if (pattern.endDate !== null) {
       text += ` until ${dayjs(pattern.endDate).format('MMMM D, YYYY')}`
     }
 

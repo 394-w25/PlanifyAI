@@ -14,7 +14,7 @@ const App = () => {
   )
 
   useEffect(() => {
-    const unsubscribe = initializeAuthListener
+    const unsubscribe = initializeAuthListener()
     return () => unsubscribe()
   }, [initializeAuthListener])
 

@@ -1,44 +1,18 @@
-import { FirebaseError } from 'firebase/app'
-import { arrayUnion, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
-import { db } from './firebaseConfig'
+import { getOrCreateDocument, updateDocument } from './firebaseUtils'
 
 const getSchedule = async (userId: string): Promise<Task[]> => {
-  try {
-    const scheduleRef = doc(db, 'schedules', userId)
-    const scheduleSnap = await getDoc(scheduleRef)
-
-    if (scheduleSnap.exists()) {
-      const data = scheduleSnap.data() as { tasks: Task[] }
-      return Array.isArray(data.tasks) ? data.tasks : []
-    }
-    else {
-      console.warn(`No schedule found for userId: ${userId}`)
-      return []
-    }
-  }
-  catch (error) {
-    console.error('Error fetching schedule:', error)
-    throw new Error('Failed to fetch schedule.')
-  }
+  const defaultTasks: Task[] = []
+  return (await getOrCreateDocument(userId, 'schedules', { tasks: defaultTasks }))?.tasks ?? []
 }
 
 const updateTask = async (userId: string, updatedTask: Task): Promise<void> => {
   try {
-    const scheduleRef = doc(db, 'schedules', userId)
-    const scheduleSnap = await getDoc(scheduleRef)
+    const userTasks = await getSchedule(userId)
+    const updatedTasks = userTasks.map(task =>
+      task.taskId === updatedTask.taskId ? updatedTask : task,
+    )
 
-    if (scheduleSnap.exists()) {
-      const data = scheduleSnap.data() as { tasks: Task[] }
-      const currentTasks = Array.isArray(data.tasks) ? data.tasks : []
-      const updatedTasks = currentTasks.map((task: Task) =>
-        task.taskId === updatedTask.taskId ? updatedTask : task,
-      )
-
-      await setDoc(scheduleRef, { tasks: updatedTasks }, { merge: true })
-    }
-    else {
-      console.warn(`No schedule found for userId: ${userId}`)
-    }
+    await updateDocument(userId, 'schedules', { tasks: updatedTasks })
   }
   catch (error) {
     console.error('Error updating task:', error)
@@ -48,39 +22,23 @@ const updateTask = async (userId: string, updatedTask: Task): Promise<void> => {
 
 const addTask = async (userId: string, newTask: Task): Promise<void> => {
   try {
-    const scheduleRef = doc(db, 'schedules', userId)
-    await updateDoc(scheduleRef, {
-      tasks: arrayUnion(newTask),
-    })
+    const userTasks = await getSchedule(userId)
+    const updatedTasks = [...userTasks, newTask]
+
+    await updateDocument(userId, 'schedules', { tasks: updatedTasks })
   }
   catch (error) {
-    if (error instanceof FirebaseError && error.code === 'not-found') {
-      await setDoc(doc(db, 'schedules', userId), {
-        tasks: [newTask],
-      })
-    }
-    else {
-      console.error('Error adding task:', error)
-      throw new Error('Failed to add task.')
-    }
+    console.error('Error adding task:', error)
+    throw new Error('Failed to add task.')
   }
 }
 
-const deleteTask = async (taskId: string, userId: string): Promise<void> => {
+const deleteTask = async (userId: string, taskId: string): Promise<void> => {
   try {
-    const scheduleRef = doc(db, 'schedules', userId)
-    const scheduleSnap = await getDoc(scheduleRef)
+    const userTasks = await getSchedule(userId)
+    const updatedTasks = userTasks.filter(task => task.taskId !== taskId)
 
-    if (scheduleSnap.exists()) {
-      const data = scheduleSnap.data() as { tasks: Task[] }
-      const currentTasks = Array.isArray(data.tasks) ? data.tasks : []
-      const updatedTasks = currentTasks.filter((task: Task) => task.taskId !== taskId)
-
-      await setDoc(scheduleRef, { tasks: updatedTasks }, { merge: true })
-    }
-    else {
-      console.warn(`No schedule found for userId: ${userId}`)
-    }
+    await updateDocument(userId, 'schedules', { tasks: updatedTasks })
   }
   catch (error) {
     console.error('Error deleting task:', error)

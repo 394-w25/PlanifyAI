@@ -37,15 +37,11 @@ const Me = () => {
 
   return (
     <Box
-      maxWidth={600}
       mx="auto"
-      px={3}
-      py={5}
       sx={{
+        px: 3,
+        py: 5,
         margin: 2,
-        backgroundColor: 'background.paper',
-        borderRadius: 2,
-        boxShadow: theme => theme.shadows[3],
       }}
     >
       <MainInfo

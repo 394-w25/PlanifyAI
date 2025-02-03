@@ -31,8 +31,9 @@ jobs:
               pages: 'ff7f0e',        // Orange - Pages Related
               hooks: '2ca02c',        // Green - Hooks Related
               utils: '9467bd',        // Purple - Utils Related
-              context: 'd62728',      // Red - Context Related
-              assets: 'ffdd57'        // Yellow - Assets Related
+              stores: 'd62728',      // Red - Context Related
+              assets: 'ffdd57',        // Yellow - Assets Related
+              types: '17becf',        // Cyan - Types Related
             };
 
             const labels = new Set();
@@ -50,11 +51,14 @@ jobs:
               if (file.filename.startsWith('src/utils')) {
                 labels.add('utils');
               }
-              if (file.filename.startsWith('src/context')) {
-                labels.add('context');
+              if (file.filename.startsWith('src/stores')) {
+                labels.add('stores');
               }
               if (file.filename.startsWith('public') || file.filename.startsWith('src/assets')) {
                 labels.add('assets');
+              }
+              if (file.filename.startsWith('src/types') || file.filename.endsWith('.d.ts')) {
+                labels.add('types');
               }
             });
 

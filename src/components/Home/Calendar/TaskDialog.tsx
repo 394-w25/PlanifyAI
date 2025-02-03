@@ -24,7 +24,12 @@ const TaskDialog = ({ open, selectedTask, handleClose }: TaskDialogProps) => {
       open={open}
       onClose={handleClose}
     >
-      <DialogTitle>Task Details</DialogTitle>
+      <DialogTitle>
+        {selectedTask?.title === '' || selectedTask == null
+          ? 'Task Details'
+          : selectedTask.title}
+      </DialogTitle>
+
       <DialogContent>
         {selectedTask && (
           <>
@@ -34,7 +39,7 @@ const TaskDialog = ({ open, selectedTask, handleClose }: TaskDialogProps) => {
             <Typography>{selectedTask.title}</Typography>
 
             <Typography variant="subtitle1" fontWeight="bold" mt={2}>
-              Date & Time:
+              Date:
             </Typography>
             <Typography>
               {actualDateTime}

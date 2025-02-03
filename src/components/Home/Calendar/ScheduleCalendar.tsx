@@ -17,7 +17,7 @@ const ServerDay = (
 
   const isSelected
     = !outsideCurrentMonth
-    && highlightedDays.includes(day.format('YYYY-MM-DD'))
+      && highlightedDays.includes(day.format('YYYY-MM-DD'))
 
   return (
     <Badge

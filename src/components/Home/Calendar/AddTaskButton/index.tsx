@@ -120,6 +120,7 @@ const AddTaskButton = ({ selectedDate }: AddTaskButtonProps) => {
               <MenuItem value="learning">Learning</MenuItem>
               <MenuItem value="other">Other</MenuItem>
               <MenuItem value="school">School</MenuItem>
+              <MenuItem value="holiday">Holiday</MenuItem>
             </Select>
           </FormControl>
           <FormControl fullWidth margin="normal">

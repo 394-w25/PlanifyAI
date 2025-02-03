@@ -1,3 +1,4 @@
+import type { EventClickArg } from '@fullcalendar/core'
 import type { Dayjs } from 'dayjs'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
@@ -123,9 +124,26 @@ const CalendarComponent = ({ schedule, setSelectedDate }: ScheduleCalendarProps)
   )
 
   const handleEventClick = useCallback(
-    ({ event }: { event: { id: string } }) => {
-      const task = schedule.find(v => v.taskId === event.id)
-      handleTaskClick(task)
+    (clickInfo: EventClickArg) => {
+      // clickInfo.event is a FullCalendar EventApi object
+      const foundTask = schedule.find(t => t.taskId === clickInfo.event.id)
+      if (foundTask) {
+        handleTaskClick(foundTask)
+      }
+      else {
+        // Build a fallback Task object for holidays
+        const holidayFallback: Task = {
+          taskId: `holiday-${clickInfo.event.id}`,
+          title: clickInfo.event.title || 'Holiday',
+          date: clickInfo.event.start?.toISOString() ?? '',
+          timeRange: null,
+          description: '',
+          category: 'holiday',
+          priority: null,
+          status: null,
+        }
+        handleTaskClick(holidayFallback)
+      }
     },
     [schedule, handleTaskClick],
   )

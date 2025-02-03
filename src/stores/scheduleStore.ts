@@ -104,7 +104,7 @@ const useScheduleStore = create<ScheduleState>()(
         }
 
         try {
-          await deleteTask(taskId, userId)
+          await deleteTask(userId, taskId)
 
           set(state => ({
             schedule: state.schedule.filter(task => task.taskId !== taskId),

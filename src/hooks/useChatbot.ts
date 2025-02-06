@@ -10,6 +10,10 @@ const chatbotResponseContentSchema = z.object({
   description: z.string(),
   category: z.enum(['work', 'personal', 'health', 'learning', 'other', 'school']),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format. Expected yyyy-mm-dd'),
+  timeRange: z.object({
+    start: z.string().regex(/^\d{2}:\d{2}$/, 'Invalid time format. Expected hh:mm'),
+    end: z.string().regex(/^\d{2}:\d{2}$/, 'Invalid time format. Expected hh:mm'),
+  }).nullable(),
   priority: z.enum(['low', 'medium', 'high']),
   comment: z.string(),
 })
@@ -84,6 +88,7 @@ const useChatbot = () => {
             temperature: 0.7,
             max_tokens: 1000,
             response_format: { type: 'json_object' },
+            schema: chatbotResponseContentSchema.shape,
           }),
         })
 
@@ -108,12 +113,35 @@ const useChatbot = () => {
           })),
         }
 
-        const parsedData = chatbotResponseSchema.safeParse(normalizedData)
+        let parsedData = chatbotResponseSchema.safeParse(normalizedData)
 
         if (!parsedData.success) {
-          console.error('Invalid response format:', parsedData.error.errors)
-          console.error('Response data:', data)
-          throw new Error('Invalid response format')
+          const errorCategory = parsedData.error.errors.find(err => err.path.includes('category'))
+          const errorPriority = parsedData.error.errors.find(err => err.path.includes('priority'))
+
+          if (normalizedData !== undefined && Array.isArray(normalizedData.choices) && normalizedData.choices[0].message?.content instanceof Object) {
+            // category fallback
+            if (errorCategory) {
+              console.warn('Invalid category received. Defaulting to "other".')
+              normalizedData.choices[0].message.content.category = 'other'
+            }
+            // priority fallback
+            if (errorPriority) {
+              console.warn('Invalid priority received. Defaulting to "low".')
+              normalizedData.choices[0].message.content.priority = 'low'
+            }
+
+            parsedData = chatbotResponseSchema.safeParse(normalizedData)
+          }
+          else {
+            console.error('Invalid response format:', parsedData.error.errors)
+            console.error('Response data:', data)
+            throw new Error('Invalid response format')
+          }
+        }
+
+        if (parsedData.data === undefined) {
+          throw new Error('Parsed data is undefined')
         }
 
         const botMessage = parsedData.data.choices[0].message.content
@@ -133,7 +161,7 @@ const useChatbot = () => {
             category: botMessage.category,
             priority: botMessage.priority,
             date: botMessage.date,
-            timeRange: { start: '00:00', end: '23:59' },
+            timeRange: botMessage.timeRange,
             status: 'completed',
             isRecurring: false,
             recurrencePattern: null,

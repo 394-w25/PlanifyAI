@@ -1,89 +1,58 @@
-name: Auto-label PR based on file paths
+name: Auto Tag PR based on file paths
 
 on: pull_request_target
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
-  label:
+  auto-tag:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
     steps:
-      - name: Checkout code
+      - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Label PR based on changes
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v45
+        with:
+          json: true
+
+      - name: Add labels based on changed files
         uses: actions/github-script@v7
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const prFiles = await github.rest.pulls.listFiles({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.payload.pull_request.number
-            });
-
-            // Define the labels and their colors
-            const labelsToColor = {
-              components: '1f77b4',   // Blue - Components Related
-              pages: 'ff7f0e',        // Orange - Pages Related
-              hooks: '2ca02c',        // Green - Hooks Related
-              utils: '9467bd',        // Purple - Utils Related
-              stores: 'd62728',      // Red - Context Related
-              assets: 'ffdd57',        // Yellow - Assets Related
-              types: '17becf',        // Cyan - Types Related
+            const changedFiles = ${{ steps.changed-files.outputs.all_changed_files }};
+            const labelMap = {
+              "src/pages/": "pages",
+              "src/components/": "components",
+              "src/hooks/": "hooks",
+              "src/stores/": "stores",
+              "src/lib/": "lib",
+              "src/utils/": "utils",
+              "src/styles/": "styles",
+              "src/types/": "types",
+              "public/": "public-assets"
             };
 
-            const labels = new Set();
+            const labelsToAdd = new Set();
 
-            prFiles.data.forEach(file => {
-              if (file.filename.startsWith('src/components')) {
-                labels.add('components');
-              }
-              if (file.filename.startsWith('src/pages')) {
-                labels.add('pages');
-              }
-              if (file.filename.startsWith('src/hooks')) {
-                labels.add('hooks');
-              }
-              if (file.filename.startsWith('src/utils')) {
-                labels.add('utils');
-              }
-              if (file.filename.startsWith('src/stores')) {
-                labels.add('stores');
-              }
-              if (file.filename.startsWith('public') || file.filename.startsWith('src/assets')) {
-                labels.add('assets');
-              }
-              if (file.filename.startsWith('src/types') || file.filename.endsWith('.d.ts')) {
-                labels.add('types');
+            changedFiles.forEach(file => {
+              for (const [path, label] of Object.entries(labelMap)) {
+                if (file.startsWith(path)) {
+                  labelsToAdd.add(label);
+                }
               }
             });
 
-            if (labels.size > 0) {
-              for (const label of labels) {
-                try {
-                  // Check if the label exists
-                  await github.rest.issues.getLabel({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    name: label
-                  });
-                } catch (error) {
-                  // If label doesn't exist, create it with the specified color
-                  await github.rest.issues.createLabel({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    name: label,
-                    color: labelsToColor[label] || 'b0b0b0', // Use default gray if no color specified
-                  });
-                }
-              }
-
-              // Add labels to the PR
+            if (labelsToAdd.size > 0) {
+              const { owner, repo, number } = context.issue;
               await github.rest.issues.addLabels({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.payload.pull_request.number,
-                labels: Array.from(labels)
+                owner,
+                repo,
+                issue_number: number,
+                labels: Array.from(labelsToAdd)
               });
             }

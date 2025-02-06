@@ -1,3 +1,6 @@
+import { useScheduleStore } from '@/stores'
+import { auth } from '@/utils/firebase'
+import { generateUniqueId } from '@zl-asica/react'
 import { useCallback, useReducer, useState } from 'react'
 
 interface MessageAction {
@@ -26,7 +29,7 @@ const useChatbot = () => {
     'If the user input does not make sense as an event, ask the user to try again in the "comment" key',
     '"category" can be "Work", "Personal", "Health", "Learning", "Other" or "School"',
     '"priority" can be "Low", "Medium" or "High"',
-    'Today is 2025.01.22 Wed',
+    `Today is ${new Date().toLocaleDateString()}.`, // Add the current date to the prompt
     '',
     'EXAMPLE INPUT 1:',
     'I have an important meeting with the board on Friday',
@@ -65,7 +68,7 @@ const useChatbot = () => {
       },
     })
   }, [])
-
+  const addTask = useScheduleStore(state => state.addTask)
   const handleSend = useCallback(
     async (input: string) => {
       addMessage(input, 'user')
@@ -94,10 +97,38 @@ const useChatbot = () => {
         }
 
         const data = await response.json() as DeepSeekResponse
-        const botMessage
-          = data?.choices?.[0]?.message?.content ?? 'No response from the bot.'
-        const parsedMessage = JSON.parse(botMessage) as { comment: string }
+        const botMessage = data?.choices?.[0]?.message?.content ?? 'No response from the bot.'
+
+        const parsedMessage = JSON.parse(botMessage) as {
+          title: string
+          description: string
+          category: TaskCategory
+          date: string
+          priority: TaskPriority
+          comment: string
+        }
+        // addMessage(botMessage, 'bot')
         addMessage(parsedMessage.comment, 'bot')
+
+        if (parsedMessage.title != null && auth.currentUser != null) {
+          const randomId = await generateUniqueId([parsedMessage.title, parsedMessage.description, parsedMessage.category, parsedMessage.priority])
+          const newTask = {
+            taskId: randomId,
+            title: parsedMessage.title,
+            description: parsedMessage.description,
+            category: parsedMessage.category,
+            priority: parsedMessage.priority,
+            date: parsedMessage.date,
+            timeRange: {
+              start: '00:00',
+              end: '23:59',
+            },
+            status: 'pending' as const,
+            isRecurring: false,
+            recurrencePattern: null,
+          }
+          await addTask(newTask)
+        }
       }
       catch (error) {
         console.error('Error:', error)
@@ -107,7 +138,7 @@ const useChatbot = () => {
         setIsLoading(false)
       }
     },
-    [addMessage, DEEPSEEK_API_URL, DEEPSEEK_API_KEY, SYSTEM_PROMPT],
+    [addMessage, DEEPSEEK_API_URL, DEEPSEEK_API_KEY, SYSTEM_PROMPT, addTask],
   )
 
   return { messages, handleSend, isLoading }

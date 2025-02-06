@@ -43,6 +43,8 @@ jobs:
             ${{ runner.os }}-build-cache-
 
       - name: 🔨 Build the app
+        env:
+          VITE_API_KEY: ${{ secrets.VITE_API_KEY }}
         run: npm run build
 
       # 🚨 Run Lint check

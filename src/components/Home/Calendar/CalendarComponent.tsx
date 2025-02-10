@@ -36,6 +36,18 @@ const CalendarComponent = ({ schedule, setSelectedDate }: ScheduleCalendarProps)
   const highlightedDays = useMemo(() => computeHighlightedDays(schedule), [schedule])
   const timeRange = useMemo(() => computeTimeRange(schedule, '08:00:00', '22:00:00'), [schedule])
 
+  const eventOrder = (a: Task, b: Task): number => {
+    if (a.priority === 'medium' && b.priority === 'high') {
+      return 1
+    }
+    else if (a.priority === 'low' && b.priority === 'medium') {
+      return 0
+    }
+    else {
+      return -1
+    }
+  }
+
   return (
     <Box sx={calendarStyles}>
       <FullCalendar
@@ -47,6 +59,7 @@ const CalendarComponent = ({ schedule, setSelectedDate }: ScheduleCalendarProps)
           right: 'dayGridMonth,timeGridWeek',
         }}
         events={highlightedDays}
+        eventOrder={eventOrder as (a: any, b: any) => number}
         editable
         selectable
         height="auto"

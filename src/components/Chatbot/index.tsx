@@ -12,7 +12,7 @@ interface ChatbotProps {
 }
 
 const Chatbot = ({ open, onClose }: ChatbotProps) => {
-  const { messages, handleSend, isLoading, chatbotError } = useChatbot()
+  const { messages, handleSend, isLoading, chatbotError, confirmationDialog } = useChatbot()
 
   useEffect(() => {
     if (chatbotError != null) {
@@ -26,6 +26,7 @@ const Chatbot = ({ open, onClose }: ChatbotProps) => {
         <MessageList messages={messages} />
         <MessageInput onSend={handleSend} isLoading={isLoading} />
       </Box>
+      {confirmationDialog}
     </CustomDialog>
   )
 }

@@ -1,4 +1,4 @@
-import { SmallLoadingCircle } from '@/components/common'
+import { ConfirmationDialog, SmallLoadingCircle } from '@/components/common'
 import { useScheduleStore } from '@/stores'
 import EditIcon from '@mui/icons-material/Edit'
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Typography } from '@mui/material'
@@ -17,6 +17,7 @@ const TaskDialog = ({ open, selectedTask, handleClose }: TaskDialogProps) => {
   const deleteTask = useScheduleStore(state => state.deleteTask)
   const [loading, setLoading] = useState(false)
   const [editDialogOpen, toggleEditDialog] = useToggle()
+  const [deleteConfirmationOpen, toggleDeleteConfirmation] = useToggle()
 
   let actualDateTime = dayjs(selectedTask?.date).format('MMMM D, YYYY')
   if (selectedTask?.timeRange) {
@@ -40,8 +41,9 @@ const TaskDialog = ({ open, selectedTask, handleClose }: TaskDialogProps) => {
     finally {
       handleClose()
       setLoading(false)
+      toggleDeleteConfirmation()
     }
-  }, [deleteTask, handleClose, selectedTask])
+  }, [deleteTask, handleClose, selectedTask, toggleDeleteConfirmation])
 
   const getRecurrenceText = (pattern: RecurrencePattern): string => {
     const intervalText = pattern.interval === 1 ? '' : `every ${pattern.interval} `
@@ -109,10 +111,20 @@ const TaskDialog = ({ open, selectedTask, handleClose }: TaskDialogProps) => {
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={handleDeleteTask} color="error">
+          <Button
+            onClick={() => {
+              toggleDeleteConfirmation()
+              setLoading(true)
+            }}
+            color="error"
+          >
             {loading ? <SmallLoadingCircle text="Delete..." /> : 'Delete'}
           </Button>
-          <Button onClick={handleClose} color="primary">
+          <Button
+            onClick={handleClose}
+            color="primary"
+            disabled={loading}
+          >
             Close
           </Button>
         </DialogActions>
@@ -127,6 +139,15 @@ const TaskDialog = ({ open, selectedTask, handleClose }: TaskDialogProps) => {
         }}
         action="Edit"
         currentTask={selectedTask}
+      />
+
+      <ConfirmationDialog
+        open={deleteConfirmationOpen}
+        title="Delete Task"
+        description="Are you sure you want to delete this task?"
+        onConfirm={handleDeleteTask}
+        onClose={toggleDeleteConfirmation}
+        maxWidth="xs"
       />
     </>
   )

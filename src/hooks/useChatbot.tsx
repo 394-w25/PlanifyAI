@@ -1,8 +1,9 @@
+import TaskAdditionConfirmationDialog from '@/components/Chatbot/TaskAdditionConfirmationDialog'
 import { useScheduleStore } from '@/stores'
 import { DEEPSEEK_API_KEY, DEEPSEEK_API_URL, SYSTEM_PROMPT } from '@/utils/chatbotConst'
 import { auth } from '@/utils/firebase'
 import { generateUniqueId } from '@zl-asica/react'
-import { useCallback, useReducer } from 'react'
+import { useCallback, useReducer, useState } from 'react'
 import { z } from 'zod'
 
 const chatbotResponseContentSchema = z.object({
@@ -48,6 +49,8 @@ const useChatbot = () => {
   const addTask = useScheduleStore(state => state.addTask)
   const [messages, dispatchMessage] = useReducer(messageReducer, [])
   const [state, dispatchChatbot] = useReducer(chatbotReducer, { isLoading: false, chatbotError: null })
+  const [pendingTask, setPendingTask] = useState<Task | null>(null)
+  const [confirmationOpen, setConfirmationOpen] = useState(false)
 
   const addMessage = useCallback((text: string, sender: 'user' | 'bot') => {
     dispatchMessage({
@@ -60,6 +63,14 @@ const useChatbot = () => {
       },
     })
   }, [])
+
+  const confirmAddTask = async () => {
+    if (pendingTask) {
+      await addTask(pendingTask)
+      setPendingTask(null)
+    }
+    setConfirmationOpen(false)
+  }
 
   const handleSend = useCallback(
     async (input: string) => {
@@ -166,7 +177,10 @@ const useChatbot = () => {
             isRecurring: false,
             recurrencePattern: null,
           }
-          await addTask(newTask)
+
+          // Store the task in the state and open the confirmation dialog
+          setPendingTask(newTask)
+          setConfirmationOpen(true)
         }
       }
       catch (error_) {
@@ -179,7 +193,7 @@ const useChatbot = () => {
         dispatchChatbot({ type: 'setLoading', payload: false })
       }
     },
-    [addMessage, addTask],
+    [addMessage, setPendingTask, setConfirmationOpen],
   )
 
   return {
@@ -187,6 +201,14 @@ const useChatbot = () => {
     handleSend,
     isLoading: state.isLoading,
     chatbotError: state.chatbotError,
+    confirmationDialog: (
+      <TaskAdditionConfirmationDialog
+        confirmationOpen={confirmationOpen}
+        setConfirmationOpen={setConfirmationOpen}
+        pendingTask={pendingTask}
+        confirmAddTask={confirmAddTask}
+      />
+    ),
   }
 }
 

@@ -17,7 +17,7 @@ interface CustomDialogProps {
   open: boolean
   onClose: () => void
   title: string
-  description?: string
+  description?: string | React.ReactNode
   actions?: DialogAction[] // Array of actions for buttons
   children?: React.ReactNode // Custom content
   maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
@@ -47,11 +47,15 @@ const CustomDialog = ({
     >
       <DialogTitle id="custom-dialog-title">{title}</DialogTitle>
       <DialogContent>
-        {description?.trim() ?? (
-          <DialogContentText id="custom-dialog-description">
-            {description}
-          </DialogContentText>
-        )}
+        {
+          typeof description === 'string'
+            ? description?.trim() ?? (
+              <DialogContentText id="custom-dialog-description">
+                {description}
+              </DialogContentText>
+            )
+            : description
+        }
         {children}
       </DialogContent>
       <DialogActions>

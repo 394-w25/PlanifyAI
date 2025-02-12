@@ -29,15 +29,16 @@ const TaskInputDialog = ({
   const [actionHappening, setActionHappening] = useState(false)
 
   const handleTaskSubmitted = useCallback(async () => {
+    const taskId = await generateUniqueId([
+      state.title,
+      state.description,
+      state.category,
+      state.priority,
+    ])
     dispatch({
       type: 'SET_FIELD',
       field: 'taskId',
-      value: await generateUniqueId([
-        state.title,
-        state.description,
-        state.category,
-        state.priority,
-      ]),
+      value: taskId,
     })
 
     const newTask: Task = {
@@ -59,7 +60,7 @@ const TaskInputDialog = ({
       setActionHappening(true)
       if (action === 'Add') {
         const addTask = useScheduleStore.getState().addTask
-        await addTask(newTask)
+        await addTask({ ...newTask, taskId })
       }
       else if (action === 'Edit') {
         const updateTask = useScheduleStore.getState().updateTask

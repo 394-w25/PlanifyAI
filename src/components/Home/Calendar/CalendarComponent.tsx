@@ -41,7 +41,7 @@ const CalendarComponent = ({ schedule, setSelectedDate }: ScheduleCalendarProps)
       return 1
     }
     else if (a.priority === 'low' && b.priority === 'medium') {
-      return 0
+      return 1
     }
     else {
       return -1

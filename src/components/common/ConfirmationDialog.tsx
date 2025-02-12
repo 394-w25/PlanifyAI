@@ -5,10 +5,11 @@ interface ConfirmationDialogProps {
   onClose: () => void
   onConfirm: () => void
   title: string
-  description?: string
+  description?: string | React.ReactNode
   confirmText?: string
   cancelText?: string
   confirmColor?: 'primary' | 'error'
+  maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
 }
 
 const ConfirmationDialog = ({
@@ -20,6 +21,7 @@ const ConfirmationDialog = ({
   confirmText = 'Confirm',
   cancelText = 'Cancel',
   confirmColor = 'error',
+  maxWidth,
 }: ConfirmationDialogProps) => {
   return (
     <CustomDialog
@@ -38,6 +40,7 @@ const ConfirmationDialog = ({
           color: confirmColor,
         },
       ]}
+      maxWidth={maxWidth}
     />
   )
 }

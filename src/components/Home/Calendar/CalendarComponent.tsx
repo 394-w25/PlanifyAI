@@ -37,15 +37,8 @@ const CalendarComponent = ({ schedule, setSelectedDate }: ScheduleCalendarProps)
   const timeRange = useMemo(() => computeTimeRange(schedule, '08:00:00', '22:00:00'), [schedule])
 
   const eventOrder = (a: Task, b: Task): number => {
-    if (a.priority === 'medium' && b.priority === 'high') {
-      return 1
-    }
-    else if (a.priority === 'low' && b.priority === 'medium') {
-      return 1
-    }
-    else {
-      return -1
-    }
+    const priorityMap = { high: 3, medium: 2, low: 1 }
+    return priorityMap[b.priority] - priorityMap[a.priority]
   }
 
   return (
